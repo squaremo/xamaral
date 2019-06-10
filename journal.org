@@ -1,0 +1,9 @@
+* 2019
+** June
+*** 10
+    - Made repo on github
+    - Created jsonnet to make tf config for a k8s cluster on gcloud
+    - Created projects, service accounts etc. for gcloud in order for tf to run
+      - Not sure I really understand the intended relationships between
+        organisations, projects, etc. - need to read up on this.
+    - Used the tf config to make a (single, tiny node) k8s cluster on gke.
