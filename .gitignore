@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# generated terraform config
+*.tf.json
+tf/.terraform/*
