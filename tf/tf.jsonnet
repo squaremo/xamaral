@@ -9,7 +9,12 @@ permissions are necessary
 
 */
 
+/* docs suggest keeping the project for the terraform state seperate - although
+this has caused some permissions wrangling :/
+*/
+
 local tf_admin_project = 'xamaral-tf-admin';
+local project = 'xamaral';
 
 local zone = 'europe-west2-a';
 
@@ -28,7 +33,7 @@ local zone = 'europe-west2-a';
   'main.tf.json': {
     provider: {
       google: {
-        project: tf_admin_project,
+        project: project,
         region: 'europe-west',
       },
     },
@@ -74,6 +79,7 @@ local zone = 'europe-west2-a';
             oauth_scopes: [
               'https://www.googleapis.com/auth/logging.write',
               'https://www.googleapis.com/auth/monitoring',
+              'https://www.googleapis.com/auth/devstorage.read_only'
             ],
 
           },

@@ -1,0 +1,3 @@
+[submodule "k8s/kube-libsonnet"]
+	path = k8s/kube-libsonnet
+	url = git@github.com:bitnami-labs/kube-libsonnet.git

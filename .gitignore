@@ -106,3 +106,7 @@ venv.bak/
 # generated terraform config
 *.tf.json
 tf/.terraform/*
+*~
+
+# static web - generated
+static-web/output/

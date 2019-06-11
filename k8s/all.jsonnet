@@ -1,0 +1,1 @@
+(import "./static-site.jsonnet")
