@@ -1,6 +1,5 @@
 Title: Day Zero
 Date: 2019-06-03
-Category: Blog
 
 Over the next few weeks I'll put together the infrastructure to host some web
 UIs and apis.  This post is just a placeholder so that there's something to
