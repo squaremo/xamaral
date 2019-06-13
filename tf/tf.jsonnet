@@ -66,10 +66,10 @@ local zone = 'europe-west2-a';
           name: 'xamaral-k8s-node-pool',
           location: zone,
           cluster: '${google_container_cluster.primary.name}',
-          node_count: 1,
+          node_count: 2,
 
           node_config: {
-            preemptible: true,
+            preemptible: false,
             machine_type: 'g1-small',
 
             metadata: {
@@ -79,7 +79,10 @@ local zone = 'europe-west2-a';
             oauth_scopes: [
               'https://www.googleapis.com/auth/logging.write',
               'https://www.googleapis.com/auth/monitoring',
-              'https://www.googleapis.com/auth/devstorage.read_only'
+              'https://www.googleapis.com/auth/devstorage.read_only',
+
+              # needed for external dns
+              'https://www.googleapis.com/auth/ndev.clouddns.readwrite',
             ],
 
           },

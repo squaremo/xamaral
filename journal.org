@@ -28,7 +28,3 @@
      - certificate handling
      - pelican configuration
      - get this journal served as part of the static site.
-
-
-
-      
