@@ -62,12 +62,16 @@ local zone = 'europe-west2-a';
       },
 
       google_container_node_pool: {
-        primary_peremptible_nodes: {
+        primary_nodes: {
           name: 'xamaral-k8s-node-pool',
           location: zone,
           cluster: '${google_container_cluster.primary.name}',
-          node_count: 2,
+          node_count: 1,
 
+          autoscaling: {
+            max_node_count: 5,
+            min_node_count: 1,
+          },
           node_config: {
             preemptible: false,
             machine_type: 'g1-small',
