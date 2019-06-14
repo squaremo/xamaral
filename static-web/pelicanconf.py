@@ -38,11 +38,16 @@ DELETE_OUTPUT_DIRECTORY = True
 #DISQUS_SITENAME = ""
 #GOOGLE_ANALYTICS = ""
 
+PLUGIN_PATHS = ['./pelican-plugins']
+PLUGINS = ['i18n_subsites']
+JINJA_ENVIRONMENT = {'extensions': ['jinja2.ext.i18n']}
+
 github_root = 'https://github.com/PaulRudin'
 # GITHUB_URL = github_root
 
 TWITTER_USERNAME = 'Paul_Rudin'
-THEME = 'notmyidea'
+THEME = './pelican-themes/pelican-bootstrap3'
+BOOTSTRAP_THEME = 'cyborg'
 
 SOCIAL = (('Twitter', f'http://twitter.com/{TWITTER_USERNAME}'),
           ('LinkedIn', 'https://www.linkedin.com/in/paul-rudin-530ba240/'),
