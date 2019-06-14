@@ -47,7 +47,7 @@ github_root = 'https://github.com/PaulRudin'
 
 TWITTER_USERNAME = 'Paul_Rudin'
 THEME = './pelican-themes/pelican-bootstrap3'
-BOOTSTRAP_THEME = 'cyborg'
+BOOTSTRAP_THEME = 'cosmo'
 
 SOCIAL = (('Twitter', f'http://twitter.com/{TWITTER_USERNAME}'),
           ('LinkedIn', 'https://www.linkedin.com/in/paul-rudin-530ba240/'),
