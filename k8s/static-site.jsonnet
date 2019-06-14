@@ -43,7 +43,7 @@ local host = "xamaral.com";
   },
   deploy: k.Deployment(name) {
     spec+: {
-      replicas: 2,
+      replicas: 1,
       template+: {
         spec+: {
           containers_+: {
