@@ -11,8 +11,10 @@ If you want to follow along and run all of this you'll need docker,
 docker-compose, python3.7 or later, pip and pipenv. I've only tested on ubuntu 18.04, but probably
 everything will work as long as docker works.
 
-You can get all of the code from github - note the tag which references code as
-show below. I'll continue to work on this, so the current version will differ.
+You can get all of the code from
+[github](https://github.com/PaulRudin/xamaral/tree/blog-2019-06-17/2auth). Note
+the tag in the url, which references code as show below. I'll continue to work
+on this, so the current version will differ.
 
 
 1. Create the directory structure and a package file.
