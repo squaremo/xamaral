@@ -1,0 +1,30 @@
+# just for local dev
+version: "3.7"
+
+x-mongo-env: &mongo-env
+  ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  ME_CONFIG_MONGODB_ADMINUSERNAME: example
+
+services:
+
+  2auth:
+
+    image: 2auth-dev
+    
+    volumes:
+      - ./app:/usr/src/app
+    ports:
+      - 8080:8000
+
+  mongo:
+    image: mongo
+
+    environment: *mongo-env
+
+  mongo-express:
+
+    image: mongo-express
+    ports:
+      - 8081:8081
+
+    environment: *mongo-env
