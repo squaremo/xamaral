@@ -113,7 +113,7 @@ on this, so the current version will differ.
 
         async def get(self):
             user = await User.get_by_id(
-            self.request.app['mongo'], self.request.query['id'])
+                self.request.app['mongo'], self.request.query['id'])
 
             if user:
                 return web.json_response(user)
