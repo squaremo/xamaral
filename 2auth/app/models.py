@@ -1,5 +1,3 @@
-from datetime import datetime
-from typing import List
 from pydantic import BaseModel
 
 
@@ -11,7 +9,7 @@ class User(BaseModel):
     async def get_by_id(db, user_id):
         user = await db.users.find_one({'id': int(user_id)})
 
-        #remove the mongo created id for simplicity for now
+        #remove the mongo created id for simplicity
         del(user['_id'])
         return user
 
