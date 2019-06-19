@@ -25,30 +25,39 @@ LINKS = ()
 
 DEFAULT_PAGINATION = 10
 
+DELETE_OUTPUT_DIRECTORY = True
+
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True
 
-FEED_ALL_ATOM = 'feeds/all.atom.xml'
-CATEGORY_FEED_ATOM = 'feeds/{slug}.atom.xml'
-
-DELETE_OUTPUT_DIRECTORY = True
-
 # Following items are often useful when publishing
 
-#DISQUS_SITENAME = ""
-#GOOGLE_ANALYTICS = ""
+# DISQUS_SITENAME = ""
+# GOOGLE_ANALYTICS = ""
 
 PLUGIN_PATHS = ['./pelican-plugins']
-PLUGINS = ['i18n_subsites']
+PLUGINS = ['i18n_subsites', 'tag_cloud']
 JINJA_ENVIRONMENT = {'extensions': ['jinja2.ext.i18n']}
 
-github_root = 'https://github.com/PaulRudin'
-# GITHUB_URL = github_root
+GITHUB_USER = None
+GITHUB_SKIP_FORK = True
+
 
 TWITTER_USERNAME = 'Paul_Rudin'
+
+
 THEME = './pelican-themes/pelican-bootstrap3'
-BOOTSTRAP_THEME = 'cosmo'
+
 
 SOCIAL = (('Twitter', f'http://twitter.com/{TWITTER_USERNAME}'),
           ('LinkedIn', 'https://www.linkedin.com/in/paul-rudin-530ba240/'),
-          ('GitHub', github_root),)
+          ('GitHub', 'https://github.com/PaulRudin/'),)
+
+
+DISPLAY_TAGS_ON_SIDEBAR = True
+DISPLAY_TAGS_INLINE = True
+
+
+ADDTHIS_PROFILE = 'a-5d0a217704939ce7'
+ADDTHIS_FACEBOOK_LIKE = False
+ADDTHIS_GOOGLE_PLUSONE = False

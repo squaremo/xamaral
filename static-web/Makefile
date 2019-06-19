@@ -72,11 +72,13 @@ publish:
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(PUBLISHCONF) $(PELICANOPTS)
 
 
-docker: html
-	docker build . -t eu.gcr.io/xamaral/static-web:$(shell git rev-parse --short HEAD)
+GIT_SHA := $(shell git rev-parse --short HEAD)
+
+docker: publish
+	docker build . -t eu.gcr.io/xamaral/static-web:$(GIT_SHA)
 
 
 push: docker
-	docker push eu.gcr.io/xamaral/static-web:$(shell git rev-parse --short HEAD)
+	docker push eu.gcr.io/xamaral/static-web:$(GIT_SHA)
 
 .PHONY: html help clean regenerate serve serve-global devserver stopserver publish docker push
