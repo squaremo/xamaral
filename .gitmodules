@@ -3,7 +3,7 @@
 	url = git@github.com:bitnami-labs/kube-libsonnet.git
 [submodule "static-web/pelican-themes"]
 	path = static-web/pelican-themes
-	url = https://github.com/getpelican/pelican-themes.git
+	url = git@github.com:PaulRudin/pelican-themes.git
 [submodule "static-web/pelican-plugins"]
 	path = static-web/pelican-plugins
 	url = git@github.com:getpelican/pelican-plugins.git
