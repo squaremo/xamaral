@@ -115,10 +115,10 @@ on this, so the current version will differ.
                 user = await User.get_by_id(
                     self.request.app['mongo'], self.request.query['id'])
 
-            if user:
-                return web.json_response(user)
-
-            return web.HTTPNotFound(text=f'User with id: {user_id}')
+                if user:
+                    return web.json_response(user)
+ 
+                return web.HTTPNotFound(text=f'User with id: {user_id}')
 
             async def post(self):
                 body = await self.request.json()
