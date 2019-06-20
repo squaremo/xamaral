@@ -61,3 +61,21 @@ DISPLAY_TAGS_INLINE = True
 ADDTHIS_PROFILE = 'a-5d0a217704939ce7'
 ADDTHIS_FACEBOOK_LIKE = False
 ADDTHIS_GOOGLE_PLUSONE = False
+
+ADDTHIS_TOP = True
+ADDTHIS_BOTTOM = True
+ADDTHIS_LEN = 1000
+
+GOOGLE_ADSENSE = {
+    'ca_id': 'ca-pub-1881555941899490',    # Your AdSense ID
+    'page_level_ads': True,          # Allow Page Level Ads (mobile)
+    'ads': {
+        'aside': False,          # Side bar banner (all pages)
+        'main_menu': False,      # Banner before main menu (all pages)
+        'index_top': False,      # Banner after main menu (index only)
+        'index_bottom': False,   # Banner before footer (index only)
+        'article_top': False,    # Banner after article title (article only)
+        'article_bottom': False, # Banner after article content (article only)
+    }
+}
+
