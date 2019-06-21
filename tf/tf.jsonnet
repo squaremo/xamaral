@@ -33,6 +33,10 @@ local zone = 'europe-west2-a';
   'main.tf.json': {
     provider: {
       google: {
+        /* 
+         we're not providing credentials here - rather relying on 
+         the provider checking GOOGLE_APPLICATION_CREDENTIALS
+         */
         project: project,
         region: 'europe-west',
       },
@@ -73,7 +77,8 @@ local zone = 'europe-west2-a';
             min_node_count: 1,
           },
           node_config: {
-            preemptible: false,
+            // just whilst we're getting going
+            preemptible: true,
             machine_type: 'g1-small',
 
             metadata: {
