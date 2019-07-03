@@ -54,7 +54,7 @@ local host = "comments.xamaral.com";
                 requests: {cpu: "100m", memory: "100Mi"},
               },
               ports: [{containerPort: 80}],
-              volumeMounts_+: {
+              volumeMounts_+:: {
                 comments_data: {
                   mountPath: "/var/lib/isso/",
                 },
@@ -63,7 +63,7 @@ local host = "comments.xamaral.com";
           },
         },
       },
-      volumeClaimTemplates_+: {
+      volumeClaimTemplates_+:: {
         comments_data: {
           storage:: "5Gi",
         },
