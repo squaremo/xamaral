@@ -32,16 +32,16 @@ RELATIVE_URLS = True
 
 STATIC_PATHS = [
     'images',
-    'extra',
+    # 'extra',
 ]
 
-CUSTOM_CSS = 'static/css/custom.css'
-CUSTOM_JS = 'static/js/custom.js'
+# CUSTOM_CSS = 'static/css/custom.css'
+# CUSTOM_JS = 'static/js/custom.js'
 
-EXTRA_PATH_METADATA = {
-    'extra/custom.css': {'path': 'static/css/custom.css'},
-    'extra/custom.js': {'path': 'static/js/custom.js'},
-}
+# EXTRA_PATH_METADATA = {
+#     'extra/custom.css': {'path': 'static/css/custom.css'},
+#     'extra/custom.js': {'path': 'static/js/custom.js'},
+#}
 
 # Following items are often useful when publishing
 
