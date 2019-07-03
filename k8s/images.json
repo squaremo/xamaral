@@ -1,5 +1,0 @@
-{
-  static_web: std.extVar("static-image"),
-  nginx_ingress_controller: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.24.1",
-  cert_manager: "bitnami/cert-manager:0.8.0",
-}
