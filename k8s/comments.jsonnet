@@ -32,7 +32,7 @@ local host = "comments.xamaral.com";
                 path: '/',
                 backend: {
                   serviceName: name,
-                  servicePort: 80,
+                  servicePort: 7000,
                 },
               },
             ],
@@ -53,7 +53,7 @@ local host = "comments.xamaral.com";
               resources: {
                 requests: {cpu: "100m", memory: "100Mi"},
               },
-              ports: [{containerPort: 80}],
+              ports: [{containerPort: 7000}],
               volumeMounts_+:: {
                 comments_data: {
                   mountPath: "/var/lib/isso/",
