@@ -48,13 +48,13 @@ local host = "comments.xamaral.com";
       template+: {
         spec+: {
           containers_+: {
-            default: {
+            default: k.Container('isso') {
               image: $.images.comments,
               resources: {
                 requests: {cpu: "100m", memory: "100Mi"},
               },
               ports: [{containerPort: 7000}],
-              volumeMounts_+:: {
+              volumeMounts_+: {
                 comments_data: {
                   mountPath: "/var/lib/isso/",
                 },
