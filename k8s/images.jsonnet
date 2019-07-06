@@ -8,4 +8,6 @@
   comments: '%(docker_registry)scomments:%(git_sha)s' % $.global,
   nginx_ingress_controller: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.24.1",
   cert_manager: "bitnami/cert-manager:0.8.0",
+  secret_gen: "quay.io/mittwald/kubernetes-secret-generator:latest",
+  postgres: "postgres:11.4",
 }

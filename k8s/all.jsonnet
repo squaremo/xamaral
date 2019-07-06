@@ -5,6 +5,8 @@ local configs = {
   ingress_controller: (import "./nginx-ingress-controller.jsonnet"),
   cert_manager: (import "./cert-manager.jsonnet"),
   comments: (import "./comments.jsonnet"),
+  secretgen: (import "./secretgen.jsonnet"),
+  postgres: (import "./postgres.jsonnet"),
 };
 
 {
