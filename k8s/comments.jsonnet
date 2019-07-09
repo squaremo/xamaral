@@ -1,19 +1,20 @@
-local k = import "kube-libsonnet/kube.libsonnet";
+local k = import 'kube-libsonnet/kube.libsonnet';
 
-local name = "comments";
-local host = "comments.xamaral.com";
+local name = 'comments';
+local host = 'comments.xamaral.com';
+local port = 8080;
 
 {
-  comments_svc: k.Service(name) {
-    target_pod: $.comments_sset.spec.template,
+  svc: k.Service(name) {
+    target_pod: $.deployment.spec.template,
   },
 
-  comments_ingress: k.Ingress(name) {
+  ingress: k.Ingress(name) {
     metadata+: {
       annotations+: {
-        "kubernetes.io/ingress.class": "nginx",
-        "certmanager.k8s.io/cluster-issuer": "letsencrypt-prod",
-        "certmanager.k8s.io/acme-challenge-type": "http01",
+        'kubernetes.io/ingress.class': 'nginx',
+        'certmanager.k8s.io/cluster-issuer': 'letsencrypt-prod',
+        'certmanager.k8s.io/acme-challenge-type': 'http01',
       },
     },
     spec+: {
@@ -32,40 +33,96 @@ local host = "comments.xamaral.com";
                 path: '/',
                 backend: {
                   serviceName: name,
-                  servicePort: 7000,
+                  servicePort: port,
                 },
               },
             ],
           },
         },
-      ], //rules
+      ],  //rules
     },
-  }, //ingress
+  },  //ingress
 
-  comments_sset: k.StatefulSet(name) {
+  creds: k.Secret(name) {
+    metadata+: {
+      annotations+: {
+        'secret-generator.v1.mittwald.de/autogenerate': 'password',
+      },
+    },
+  },
+
+  cfmap: k.ConfigMap(name) {
+    data+: {
+      'db_setup.sh': (importstr './db_setup.sh'),
+    },
+  },
+  deployment: k.Deployment(name) {
     spec+: {
       replicas: 1,
       template+: {
         spec+: {
-          containers_+: {
-            default: k.Container('isso') {
-              image: $.images.comments,
-              resources: {
-                requests: {cpu: "100m", memory: "100Mi"},
-              },
-              ports: [{containerPort: 7000}],
-              volumeMounts_+: {
-                comments_data: {
-                  mountPath: "/var/lib/isso/",
-                },
+          volumes_+: {
+            config: {
+              configMap: {
+                name: name,
+                defaultMode: std.parseOctal('0744'),
               },
             },
           },
-        },
-      },
-      volumeClaimTemplates_+:: {
-        comments_data: {
-          storage:: "5Gi",
+          // we need the ordering so no initContainers_
+          initContainers+: [
+            k.Container('db-setup') {
+              image: $.images.postgres,
+              command: ['/etc/config/db_setup.sh'],
+              volumeMounts_+: {
+                config: {
+                  mountPath: '/etc/config',
+                },
+              },
+              env_+: {
+                COMMENTS_PW: {
+                  secretKeyRef: {
+                    name: name,
+                    key: 'password',
+                  },
+                },
+                PGHOST: 'postgres',
+                PGPASSWORD: {
+                  secretKeyRef: {
+                    name: 'postgres',
+                    key: 'password',
+                  },
+                },
+                PGUSER: 'postgres',
+              },
+            },
+          ],
+          containers_+: {
+            default: k.Container('name') {
+              image: $.images.comments,
+              resources: {
+                requests: { cpu: '100m', memory: '100Mi' },
+              },
+              env_+: {
+                COMMENTO_ORIGIN: 'https://%s' % host,
+                COMMENTO_POSTGRES:
+                  'postgres://comments:$(COMMENTS_DB_PASSWORD)@postgres:5432/comments?sslmode=disable',
+              },
+              // NB - since we're using this variable in another, it has to be defined first
+              env: [
+                {
+                  name: 'COMMENTS_DB_PASSWORD',
+                  valueFrom: {
+                    secretKeyRef: {
+                      name: name,
+                      key: 'password',
+                    },
+                  },
+                },
+              ] + super.env,
+              ports: [{ containerPort: port }],
+            },
+          },
         },
       },
     },

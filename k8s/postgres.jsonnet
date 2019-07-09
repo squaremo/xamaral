@@ -32,17 +32,14 @@ local name = "postgres";
                   subPath: "db",
                 },
               },
-              env: [
-                {
-                  name: 'POSTGRES_PASSWORD',
-                  valueFrom: {
-                    secretKeyRef: {
-                      name: name,
-                      key: "password",
-                    },
+              env_+: {
+                POSTGRES_PASSWORD: {
+                  secretKeyRef: {
+                    name: name,
+                    key: "password",
                   },
                 },
-              ],
+              },
             },
           },
         },
