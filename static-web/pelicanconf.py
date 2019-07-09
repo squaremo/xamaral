@@ -79,6 +79,7 @@ ADDTHIS_TOP = True
 ADDTHIS_BOTTOM = True
 ADDTHIS_LEN = 1000
 
+'''
 GOOGLE_ADSENSE = {
     'ca_id': 'ca-pub-1881555941899490',    # Your AdSense ID
     'page_level_ads': True,          # Allow Page Level Ads (mobile)
@@ -91,4 +92,5 @@ GOOGLE_ADSENSE = {
         'article_bottom': False, # Banner after article content (article only)
     }
 }
-
+'''
+COMMENTO_SITENAME = 'https://comments.xamaral.com'
