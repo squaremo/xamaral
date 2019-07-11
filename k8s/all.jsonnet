@@ -1,4 +1,7 @@
-local images = {images:: (import "images.jsonnet")};
+local globals = {
+  images:: import "images.jsonnet",
+  secrets:: import "secrets.json",
+};
 
 local configs = {
   static_site: (import "./static-site.jsonnet"),
@@ -7,9 +10,11 @@ local configs = {
   comments: (import "./comments.jsonnet"),
   secretgen: (import "./secretgen.jsonnet"),
   postgres: (import "./postgres.jsonnet"),
+  oauth2_proxy: import "./oauth2-proxy.jsonnet",
+  global_secret: import "./secrets.jsonnet",
 };
 
 {
-  [k]: images + configs[k]
+  [k]: globals + configs[k]
   for k in std.objectFields(configs)
 }

@@ -37,7 +37,7 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
     target_pod: $.deployment.spec.template,
 
   },
-    
+
   deployment: k.Deployment(name) {
     spec+: {
       replicas: 1,
@@ -45,7 +45,7 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
         spec+: {
           containers_+: {
             default: k.Container(name) {
-              image: $.images.oauth_proxy,
+              image: $.images.oauth2_proxy,
               resources: {
                 requests: {cpu: '100m', memory: '100Mi'},
               },
@@ -57,10 +57,20 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
                 '--redeem-url=%s/oauth/token' % auth0_url,
                 '--validate-url=%s/userinfo' % auth0_url,
               ],
-              ports: [{containerPort: port}]
+              ports: [{containerPort: port}],
               env_+: {
-                OAUTH2_PROXY_CLIENT_ID: $.secrets.oauth_client_id,
-                OAUTH2_PROXY_CLIENT_SECRET: $.secrets.oauth_client_secret,
+                OAUTH2_PROXY_CLIENT_ID: {
+                  secretKeyRef: {
+                    name: 'global-secret',
+                    key: 'oauth_client_id',
+                  },
+                },
+                OAUTH2_PROXY_CLIENT_SECRET: {
+                  secretKeyRef: {
+                    name: 'global-secret',
+                    key: 'oauth_client_secret',
+                  },
+                },
               },  
             },
           },
