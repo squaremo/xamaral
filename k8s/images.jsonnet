@@ -10,4 +10,5 @@
   cert_manager: "bitnami/cert-manager:0.8.0",
   secret_gen: "quay.io/mittwald/kubernetes-secret-generator:latest",
   postgres: "postgres:11.4",
+  oauth2_proxy: 'quay.io/repository/pusher/oauth2_proxy:v3.2.0',
 }
