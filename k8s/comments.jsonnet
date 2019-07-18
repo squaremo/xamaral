@@ -1,10 +1,9 @@
-local k = import 'kube-libsonnet/kube.libsonnet';
-
 local name = 'comments';
 local host = 'comments.xamaral.com';
 local port = 8080;
 
 {
+  local k = $.k,
   svc: k.Service(name) {
     target_pod: $.deployment.spec.template,
   },
@@ -122,9 +121,9 @@ local port = 8080;
               ] + super.env,
               ports: [{ containerPort: port }],
             },
-          },
-        },
-      },
-    },
-  },
+          }, //containers_
+        }, //spec
+      }, //template
+    }, //spec
+  }, //deployment  
 }

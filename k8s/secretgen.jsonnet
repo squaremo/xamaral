@@ -1,8 +1,8 @@
-local k = import "kube-libsonnet/kube.libsonnet";
-
 local name = "secretgen";
 local namespace = 'kube-system';
 {
+  local k = $.k,
+
   deployment: k.Deployment(name) {
     metadata+: {
       namespace: namespace,

@@ -6,9 +6,9 @@ github.com:bitnami/kube-prod-runtime (apache 2 license)
 
  */
 
-local kube = import "kube-libsonnet/kube.libsonnet";
 
 {
+  local kube = $.k,
   p:: "",
   metadata:: {
     metadata+: {

@@ -1,8 +1,8 @@
-local k = import "kube-libsonnet/kube.libsonnet";
-
 local name = "postgres";
 
 {
+  local k = $.k,
+
   svc: k.Service(name) {
     target_pod: $.sset.spec.template,
   },

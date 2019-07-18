@@ -1,13 +1,13 @@
-local k = import 'kube-libsonnet/kube.libsonnet';
 local name = 'oauth2-proxy';
-local host = 'oauth.xamaral.com';
+local host = 'auth.xamaral.com';
 local port = 4180;
 local auth0_url = 'https://xamaral.eu.auth0.com/';
 
 {
-  
-  ingress: k.Ingress(name) {
-    spec: {
+  local k = $.k,
+
+  ingress: k.Ingress(name) + k.mixins.TlsIngress + {
+    spec+: {
       rules: [
         {
           host: host,
@@ -23,19 +23,20 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
             ],
           },
         },
-      ], //rules
-      tls: [
-        {
-          hosts: [host],
-          secretName: '%s-tls-secret' % name,
-        },
-      ],
+      ],  //rules
     },
-  }, // ingress
+  },  // ingress
 
   service: k.Service(name) {
     target_pod: $.deployment.spec.template,
+  },
 
+  secret: k.Secret(name) {
+    metadata+: {
+      annotations+: {
+        'secret-generator.v1.mittwald.de/autogenerate': 'cookie-secret',
+      },
+    },
   },
 
   deployment: k.Deployment(name) {
@@ -47,7 +48,7 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
             default: k.Container(name) {
               image: $.images.oauth2_proxy,
               resources: {
-                requests: {cpu: '100m', memory: '100Mi'},
+                requests: { cpu: '100m', memory: '100Mi' },
               },
               args: [
                 '--provider=oidc',
@@ -57,7 +58,7 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
                 '--redeem-url=%s/oauth/token' % auth0_url,
                 '--validate-url=%s/userinfo' % auth0_url,
               ],
-              ports: [{containerPort: port}],
+              ports: [{ containerPort: port }],
               env_+: {
                 OAUTH2_PROXY_CLIENT_ID: {
                   secretKeyRef: {
@@ -71,7 +72,13 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
                     key: 'oauth_client_secret',
                   },
                 },
-              },  
+                OAUTH2_PROXY_COOKIE_SECRET: {
+                  secretKeyRef: {
+                    name: name,
+                    key: 'cookie_secret',
+                  },
+                },
+              },
             },
           },
         },
