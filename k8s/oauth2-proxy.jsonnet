@@ -52,30 +52,31 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
               },
               args: [
                 '--provider=oidc',
-                '--http-address=0.0.0.0%s' % port,
+                '--http-address=0.0.0.0:%s' % port,
                 '--oidc-issuer-url=%s' % auth0_url,
                 '--login-url=%s/authorize' % auth0_url,
                 '--redeem-url=%s/oauth/token' % auth0_url,
                 '--validate-url=%s/userinfo' % auth0_url,
+                '--email-domain=*',
               ],
               ports: [{ containerPort: port }],
               env_+: {
                 OAUTH2_PROXY_CLIENT_ID: {
                   secretKeyRef: {
-                    name: 'global-secret',
+                    name: 'global-secrets',
                     key: 'oauth_client_id',
                   },
                 },
                 OAUTH2_PROXY_CLIENT_SECRET: {
                   secretKeyRef: {
-                    name: 'global-secret',
+                    name: 'global-secrets',
                     key: 'oauth_client_secret',
                   },
                 },
                 OAUTH2_PROXY_COOKIE_SECRET: {
                   secretKeyRef: {
                     name: name,
-                    key: 'cookie_secret',
+                    key: 'cookie-secret',
                   },
                 },
               },

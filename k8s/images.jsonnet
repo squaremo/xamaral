@@ -10,6 +10,6 @@
   cert_manager: "bitnami/cert-manager:0.8.0",
   secret_gen: "quay.io/mittwald/kubernetes-secret-generator:latest",
   postgres: "postgres:11.4",
-  oauth2_proxy: 'quay.io/repository/pusher/oauth2_proxy:v3.2.0',
-  sso_helper: '%(docker_registry)ssso-helper:latest' % $.global,
+  oauth2_proxy: 'bitnami/oauth2-proxy:3.2.0',
+  sso_helper: '%(docker_registry)ssso-helper:%(git_sha)s' % $.global,
 }

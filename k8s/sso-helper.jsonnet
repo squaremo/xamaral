@@ -16,7 +16,7 @@
           http: {
             paths: [
               {
-                path: '/comments-sso',
+                path: '/',
                 backend: $.service.name_port,
               },              
             ],
@@ -36,7 +36,7 @@
               env_+: {
                 SSO_HELPER_COMMENTO_SECRET: {
                   secretKeyRef: {
-                    name: 'global-secret',
+                    name: 'global-secrets',
                     key: 'commento_hmac',
                   }
                 },
