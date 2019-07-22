@@ -8,7 +8,7 @@
   },
 
   
-  ingress: k.Ingress(name) + k.mixins.TlsIngress + {
+  ingress: k.Ingress(name) + k.mixins.TlsIngress + k.mixins.AuthIngress {
     spec+: {
       rules: [
         {

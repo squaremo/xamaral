@@ -58,6 +58,7 @@ local auth0_url = 'https://xamaral.eu.auth0.com/';
                 '--redeem-url=%s/oauth/token' % auth0_url,
                 '--validate-url=%s/userinfo' % auth0_url,
                 '--email-domain=*',
+                '--cookie-domain=xamaral.com',
               ],
               ports: [{ containerPort: port }],
               env_+: {

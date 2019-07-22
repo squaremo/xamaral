@@ -26,7 +26,7 @@
       auth_endpoint:: 'https://auth.xamaral.com/oauth2/',
       metadata+: {
         annotations+: {
-          'nginx.ingress.kubernetes.io/auth-signin': s.auth_endpoint + 'start',
+          'nginx.ingress.kubernetes.io/auth-signin': '%sstart?rd=$request_uri' % s.auth_endpoint,
           'nginx.ingress.kubernetes.io/auth-url': s.auth_endpoint + 'auth',
         },
       },
