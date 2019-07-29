@@ -1,4 +1,5 @@
 {
+  local sso = self,
   local k = $.k,
   local name = 'sso-helper',
   local port = 8080,
@@ -8,7 +9,7 @@
   },
 
   
-  ingress: k.Ingress(name) + k.mixins.TlsIngress + k.mixins.AuthIngress {
+  ingress: k.Ingress(name) + k.mixins.AuthedIngress {
     spec+: {
       rules: [
         {
@@ -25,6 +26,9 @@
       ],
     },
   },
+
+  auth_ingress: k.funcs.AuthIngressFor(sso.ingress),
+
   deployment: k.Deployment(name) {
     spec+: {
       template+: {

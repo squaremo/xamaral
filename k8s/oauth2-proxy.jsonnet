@@ -1,31 +1,9 @@
 local name = 'oauth2-proxy';
-local host = 'auth.xamaral.com';
 local port = 4180;
 local auth0_url = 'https://xamaral.eu.auth0.com/';
 
 {
   local k = $.k,
-
-  ingress: k.Ingress(name) + k.mixins.TlsIngress + {
-    spec+: {
-      rules: [
-        {
-          host: host,
-          http: {
-            paths: [
-              {
-                backend: {
-                  serviceName: name,
-                  servicePort: port,
-                },
-                path: '/',
-              },
-            ],
-          },
-        },
-      ],  //rules
-    },
-  },  // ingress
 
   service: k.Service(name) {
     target_pod: $.deployment.spec.template,

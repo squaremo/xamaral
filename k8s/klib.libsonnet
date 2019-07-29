@@ -1,5 +1,7 @@
 (import 'kube-libsonnet/kube.libsonnet') {
 
+  local t = self,
+
   mixins: {
     TlsIngress: {
       local s = self,
@@ -20,16 +22,37 @@
       },
     },
 
-    AuthIngress: {
+    AuthedIngress: self.TlsIngress + {
       local s = self,
-      //host:: s.spec.rules[0].host, // beware, we don't cope properly with multiple hosts here.
-      auth_endpoint:: 'https://auth.xamaral.com/oauth2/',
+      auth_endpoint:: 'https://$host/oauth2/',
       metadata+: {
         annotations+: {
-          'nginx.ingress.kubernetes.io/auth-signin': '%sstart?rd=$request_uri' % s.auth_endpoint,
+          'nginx.ingress.kubernetes.io/auth-signin': '%sstart?rd=$escaped_request_uri' % s.auth_endpoint,
           'nginx.ingress.kubernetes.io/auth-url': s.auth_endpoint + 'auth',
         },
       },
     },
+
+  },
+
+  funcs: {
+    AuthIngressFor(ing):: 
+      $.Ingress(ing.metadata.name + '-oauth2') {
+        spec+: {
+          rules+: [{
+            // we don't deal with multiple hosts
+            host: ing.spec.rules[0].host,
+            http+: {
+              paths+: [{
+                backend+: {
+                  serviceName: 'oauth2-proxy',
+                  servicePort: 4180,
+                },
+                path: '/oauth2',
+              }],
+            },
+          }],
+        },
+      },
   },
 }
