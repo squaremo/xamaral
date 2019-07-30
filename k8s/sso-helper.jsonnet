@@ -36,6 +36,7 @@
           containers_+: {
             default: k.Container(name) {
               image: $.images.sso_helper,
+              imagePullPolicy: 'Always',
               ports: [{ containerPort: 8080 }],
               env_+: {
                 SSO_HELPER_COMMENTO_SECRET: {

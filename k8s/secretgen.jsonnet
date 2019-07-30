@@ -16,7 +16,8 @@ local namespace = 'kube-system';
             secretgen: {
               image: $.images.secret_gen,
               command: ["/kubernetes-secret-generator"],
-              args: ["-logtostderr", "-all-namespaces", "-regenerate-insecure"]
+              # 32 because oauth2-proxy cookie secret can only be certain lengths
+              args: ["-logtostderr", "-all-namespaces", "-regenerate-insecure", "-secret-length=32"]
             },
           },
         },

@@ -29,6 +29,7 @@
         annotations+: {
           'nginx.ingress.kubernetes.io/auth-signin': '%sstart?rd=$escaped_request_uri' % s.auth_endpoint,
           'nginx.ingress.kubernetes.io/auth-url': s.auth_endpoint + 'auth',
+          "nginx.ingress.kubernetes.io/auth-response-headers": "X-Auth-Request-User, X-Auth-Request-Email, Authorization",
         },
       },
     },
