@@ -9,4 +9,4 @@ psql -tc "SELECT 1 from pg_roles WHERE rolname = 'comments'" |\
         psql -tc "GRANT ALL on DATABASE comments TO comments"
     }
 # password might be regenerated
-psql -tc "ALTER USER comments SET ENCRYPTED PASSWORD '${COMMENTS_PW}'"
+psql -tc "ALTER USER comments WITH ENCRYPTED PASSWORD '${COMMENTS_PW}'"
