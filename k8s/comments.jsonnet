@@ -121,9 +121,9 @@ local port = 8080;
               ] + super.env,
               ports: [{ containerPort: port }],
             },
-          }, //containers_
-        }, //spec
-      }, //template
-    }, //spec
-  }, //deployment  
+          },  //containers_
+        },  //spec
+      },  //template
+    },  //spec
+  },  //deployment
 }

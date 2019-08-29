@@ -29,7 +29,7 @@
         annotations+: {
           'nginx.ingress.kubernetes.io/auth-signin': '%sstart?rd=$escaped_request_uri' % s.auth_endpoint,
           'nginx.ingress.kubernetes.io/auth-url': s.auth_endpoint + 'auth',
-          "nginx.ingress.kubernetes.io/auth-response-headers": "X-Auth-Request-User, X-Auth-Request-Email, Authorization",
+          "nginx.ingress.kubernetes.io/auth-response-headers": "X-Auth-ID",
         },
       },
     },
@@ -46,8 +46,8 @@
             http+: {
               paths+: [{
                 backend+: {
-                  serviceName: 'oauth2-proxy',
-                  servicePort: 4180,
+                  serviceName: 'k8s-sso',
+                  servicePort: 8080,
                 },
                 path: '/oauth2',
               }],

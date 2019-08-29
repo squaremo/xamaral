@@ -6,6 +6,18 @@ update:
 	kubecfg update -V git_sha=$(GIT_SHA) --ignore-unknown all.jsonnet
 
 diff:
-	kubecfg diff -V git_sha=$(GIT_SHA) all.jsonnet
+	kubecfg diff --diff-strategy=subset -V git_sha=$(GIT_SHA) all.jsonnet
 
-.PHONY: show update diff
+
+JS_FILES := $(wildcard *.jsonnet)
+
+fmt: $(JS_FILES:%=%-fmt)
+fmttest: $(JS_FILES:%=%-fmttest)
+
+%-fmt: %
+	jsonnetfmt -i -- $<
+
+%-fmttest: %
+	jsonnetfmt --test $<
+
+.PHONY: show update diff %-fmt %-fmttest fmt fmttest

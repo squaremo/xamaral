@@ -1,4 +1,4 @@
-local name = "postgres";
+local name = 'postgres';
 
 {
   local k = $.k,
@@ -10,7 +10,7 @@ local name = "postgres";
   creds: k.Secret(name) {
     metadata+: {
       annotations+: {
-        "secret-generator.v1.mittwald.de/autogenerate": "password"
+        'secret-generator.v1.mittwald.de/autogenerate': 'password',
       },
     },
   },
@@ -23,30 +23,30 @@ local name = "postgres";
             default: k.Container(name) {
               image: $.images.postgres,
               resources: {
-                requests: {cpu: "100m", memory: "100Mi"}
+                requests: { cpu: '100m', memory: '100Mi' },
               },
-              ports: [{containerPort: 5432}],
+              ports: [{ containerPort: 5432 }],
               volumeMounts_+: {
                 postgres_data: {
-                  mountPath: "/var/lib/postgresql/data",
-                  subPath: "db",
+                  mountPath: '/var/lib/postgresql/data',
+                  subPath: 'db',
                 },
               },
               env_+: {
                 POSTGRES_PASSWORD: {
                   secretKeyRef: {
                     name: name,
-                    key: "password",
+                    key: 'password',
                   },
                 },
               },
             },
           },
         },
-      }, //template
+      },  //template
       volumeClaimTemplates_+:: {
         postgres_data: {
-          storage: "10Gi",
+          storage: '10Gi',
         },
       },
     },

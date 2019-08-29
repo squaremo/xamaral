@@ -1,4 +1,4 @@
-local name = "secretgen";
+local name = 'secretgen';
 local namespace = 'kube-system';
 {
   local k = $.k,
@@ -15,9 +15,9 @@ local namespace = 'kube-system';
           containers_: {
             secretgen: {
               image: $.images.secret_gen,
-              command: ["/kubernetes-secret-generator"],
-              # 32 because oauth2-proxy cookie secret can only be certain lengths
-              args: ["-logtostderr", "-all-namespaces", "-regenerate-insecure", "-secret-length=32"]
+              command: ['/kubernetes-secret-generator'],
+              // 32 because oauth2-proxy cookie secret can only be certain lengths
+              args: ['-logtostderr', '-all-namespaces', '-regenerate-insecure', '-secret-length=32'],
             },
           },
         },
@@ -34,7 +34,7 @@ local namespace = 'kube-system';
       },
     ],
   },
-  
+
   crb: k.ClusterRoleBinding(name) {
     roleRef: {
       kind: 'ClusterRole',
@@ -53,6 +53,6 @@ local namespace = 'kube-system';
   sa: k.ServiceAccount(name) {
     metadata+: {
       namespace: namespace,
-    }
+    },
   },
 }
