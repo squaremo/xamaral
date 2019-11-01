@@ -1,0 +1,4 @@
+version: 1
+patchUpdated:
+  generators:
+    - command: kubecfg show -V "git_sha=$(git rev-parse --short HEAD)" all.jsonnet

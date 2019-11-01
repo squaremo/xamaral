@@ -10,6 +10,7 @@
   cert_manager: 'bitnami/cert-manager:0.8.0',
   secret_gen: 'quay.io/mittwald/kubernetes-secret-generator:latest',
   postgres: 'postgres:11.4',
-  oauth2_proxy: 'bitnami/oauth2-proxy:3.2.0',
-  k8s_sso: '%(docker_registry)sk8s-sso:latest' % $.global,
+  k8s_sso: 'xamaral/k8s-sso:latest',
+  flux: 'xamaral/fluxkcfg:f80cb87',
+  flux_memcached: 'memcached:1.5.15',
 }

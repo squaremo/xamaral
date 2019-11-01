@@ -15,6 +15,7 @@ local configs = {
   postgres: (import './postgres.jsonnet'),
   global_secret: import './secrets.jsonnet',
   hello: import './hello.jsonnet',
+  flux: import './flux.jsonnet',
 };
 
 {
