@@ -43,6 +43,7 @@
                 '--git-branch=master',
                 '--git-label=flux-sync',
                 '--git-email=paul+flux@rudin.co.uk',
+                '--manifest-generation=true',
               ],
             },
           },
