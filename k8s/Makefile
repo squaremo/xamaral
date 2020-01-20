@@ -1,8 +1,12 @@
 GIT_SHA := $(shell git rev-parse --short HEAD)
-show:
+
+sealed-secrets.json: secrets.jsonnet secrets.json
+	jsonnet -e "(import 'secrets.jsonnet').global_secret"|kubeseal --cert kubeseal-public-cert.pem -o json > sealed-secrets.json
+
+show: sealed-secrets.json
 	kubecfg show -V git_sha=$(GIT_SHA) all.jsonnet
 
-update:
+update: sealed-secrets.json
 	kubecfg update -V git_sha=$(GIT_SHA) --ignore-unknown all.jsonnet
 
 diff:

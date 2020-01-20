@@ -8,7 +8,6 @@ verify_ssl = true
 [packages]
 pelican = "*"
 markdown = "*"
-pelican-bootstrap3 = "*"
 
 [requires]
 python_version = "3.7"
