@@ -110,3 +110,7 @@ tf/.terraform/*
 
 # static web - generated
 static-web/output/
+*.aux
+*.aux
+*.dvi
+*.out

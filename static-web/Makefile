@@ -37,6 +37,17 @@ help:
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
 	@echo '                                                                          '
 
+TOPTARGETS := all clean
+
+SUBDIRS := tex/
+
+$(TOPTARGETS): $(SUBDIRS)
+
+$(SUBDIRS):
+	$(MAKE) -C $@ $(MAKECMDGOALS)
+
+all: html
+
 html:
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 
@@ -81,4 +92,7 @@ docker: publish
 push: docker
 	docker push eu.gcr.io/xamaral/static-web:$(GIT_SHA)
 
+
+
 .PHONY: html help clean regenerate serve serve-global devserver stopserver publish docker push
+

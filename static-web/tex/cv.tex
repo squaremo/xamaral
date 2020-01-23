@@ -1,0 +1,181 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[inline]{enumitem}
+\setlist[itemize]{topsep=6pt}
+\usepackage{titlesec}
+\titleformat{\subsection}[block]{\Large\bfseries\filcenter}{}{1em}{}
+
+\usepackage[nohead,nofoot,hmargin=2cm,vmargin=1cm]{geometry}
+\usepackage[default]{opensans}
+\usepackage{tabularx}
+\usepackage{wasysym}
+\usepackage{marvosym}
+\usepackage{hyperref}
+\usepackage{mathptmx}
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+\setlength\parindent{0pt}
+%course/job title ; employer/institution ; dates
+\newcommand{\centry}[3]{\paragraph{#1} \textit{#2}%
+\hfill#3\\[2pt]}
+%
+
+
+\begin{document}
+\begin{tabularx}{\linewidth}{XX}
+  \begin{flushleft}
+    {\large PAUL RUDIN}
+  \end{flushleft}
+&
+  \begin{flushright}
+    2 Sedley Taylor Road, Cambridge, CB2 8PW\\
+    Phone: 01223 243569\\
+    Mobile: 07939 720169\\
+    Email: \href{mailto:paul@rudin.co.uk}{paul@rudin.co.uk}
+  \end{flushright}
+\end{tabularx}
+
+\rule{\textwidth}{1pt}
+
+\subsection*{Employment}
+
+\centry{Software Development Engineer}{Speechmatics Ltd.}{Oct 2018--June 2019}
+
+I worked as part of the team delivering a new SaaS speech transcription
+service. The system consists of a set of interacting microservices implemented
+in Python and Golang. We used Elasticsearch, Logstash and Kibana for analytics
+and support tools. We used Terraform to provision cloud infrastructure on Azure
+and Jsonnet to generate consistent Terraform and Kubernetes configuration.
+
+\centry{Principal Software Engineer}{Cambridge Consultants Ltd.}{July 2018--Oct
+2018}
+
+I worked as part of the Internet Software and Services Group, delivering
+bespoke cloud-based solutions for clients, deployed to Google Cloud. My focus
+was on creating back end api servers and orchestration of interacting
+components in kubernetes clusters.
+
+\centry{Senior Software Engineer}{Grapeshot Ltd. (now part of
+  Oracle)}{2016--July 2018}
+
+I was responsible for a developer portal and associated REST apis. The portal
+is a Python/Django application and provides account management, subscription
+plans, quota and usage enforcement and associated documentation. The apis are
+implemented using either Node.js/Hapi.js or Python/Aiohttp. Components are
+packaged as Docker images and deployed to Kubernetes clusters (configured using
+Ksonnet/Jsonnet) provisioned on AWS. Persistence wis achieved using MySql and
+Elasticsearch. Jenkins is used to automate building, testing and deployment. We
+provide SDKs and code samples in various languages to facilitate and illustrate
+use of the apis. We use scrum and agile software development practices.
+
+\centry{Contracts Manager}{University of Cambridge}{2015--2016}
+I negotiated and drafted research contracts on behalf of the university.
+
+\centry{Paralegal}{Ministry of Justice/Sharpe Pritchard LLP}{2014--2015} I
+assisted the Ministry in negotiations on a large IT contract.
+
+\centry{Freelance Computer Programmer}{Flax}{2005--2013} I designed and
+implemented web-based search systems for a variety of clients, usually as a
+subcontractor for \href{http://www.flax.co.uk}{Flax}. I completed stand-alone
+projects in their entirety as well as working as part of a team on larger
+projects.  Most projects were implemented in Python, using the Xapian or Lucene
+search engines. I made significant contributions to a high level Python wrapper
+for Xapian; wrote an off-the-shelf open source search system from scratch; as
+well as many modules for text processing and tokenisation; web, database and
+file system crawling; indexing and search, as well as web front ends.
+
+\centry{Computer Programmer and Team Leader}{Scientia Ltd.}{1999--2005} I was
+responsible for the development of the company's flagship academic scheduling
+software. This work involved: designing and implementing timetable scheduling
+algorithms and heuristics; supervising other programmers; liaising with other
+parts of the company and clients on new features; and determining appropriate
+bug-tracking, testing and source control processes. I recruited and led other
+programmers.
+
+
+\centry{Research Associate}{Queen Mary College}{1994}
+I worked in the computer science department on research and implementation in
+the field proof theory. I investigated the automatic generation of natural
+deduction proofs.
+
+\centry{Assistant Director, Financial Analyst, Computer Programmer}{MDT
+  Limited}{1986-1992}
+I developed computer models for assessing the value of large, complex
+funding transactions (e.g. bond issues, aircraft leases). I was involved in
+negotiations with clients, funders and legal advisers; preparing contracts;
+writing proposals and numerical analyses of transactions.
+
+
+\subsection*{Education}
+
+\centry{Online Courses}{\emph{via} Udacity or Coursera}{2011--2015} I have undertaken several online courses
+on theoretical and practical aspects of computing. In all cases I attained high
+grades.
+\begin{enumerate*}[label=(\alph*)]
+\item John Hopkins data science courses:
+  \href{https://drive.google.com/open?id=0BzIgco934WByWEt1RVdxazVSckk}{Data
+    Scientist's Toolbox},
+  \href{https://drive.google.com/open?id=0BzIgco934WByeWdrM0pNMndVS2M}{Getting
+    and Cleaning Data},
+  \href{https://drive.google.com/open?id=0BzIgco934WBydkxiNGJTUFNCQVU}{R
+    Programming},
+  \href{https://drive.google.com/open?id=0BzIgco934WByTmtVYjl3MXROZG8}{Exploratory
+    Data Analysis}.
+\item Stanford courses:
+  \href{https://drive.google.com/open?id=0BzIgco934WByR3NldDVjVTFfR2s}{Natural
+    Language Processing},
+  \href{https://drive.google.com/open?id=0BzIgco934WByZ0VLRm1KWjlTaGM}{Algorithms:
+    Design and Analysis},
+  \href{https://drive.google.com/open?id=0BzIgco934WBydEY5TWJVcmltREk}{Introduction
+    to Artificial Intelligence}, \href{https://drive.google.com/open?id=0BzIgco934WByZ0VLRm1KWjlTaGM}{Machine Learning}.
+\item UC Berkley courses: \href{https://drive.google.com/open?id=0BzIgco934WByZ0VLRm1KWjlTaGM}{Software as a Service}, \href{https://drive.google.com/open?id=0BzIgco934WByRDJJYWpCZkx0OHc}{Web Development}.
+\end{enumerate*}
+
+\centry{Bar Professional Training Course}{BBP Law School}{2013--2014}
+ Passed graded Very Competent. I have been called to the bar. Transcript:
+\url{http://goo.gl/wSo4yn}
+
+
+\centry{Graduate Diploma in Law}{BPP Law School}{2013} 
+Passed with Distinction. Transcript: \url{http://goo.gl/ljZMYs}.
+
+\centry{Doctorate in Theoretical Computer Science}{St Hugh's College, Oxford
+  University} {1994--1998} My thesis is entitled ``A framework for diagrammatic
+reasoning''. I use category theory to develop techniques for using diagrams and
+their transformations as formal mathematical proofs.  I taught programming to
+engineering undergraduates (mostly C++).  Awarded an Engineering and Physical
+Sciences Research Council Studentship.
+
+
+\centry{MSc, Advanced Methods in Computer Science}{Queen Mary College, London
+  University}{1992--1993} Passed with distinction, with distinction grades in
+every paper (transcript: \url{https://goo.gl/i1wdJ5}) The course included the
+modules: Automated Reasoning; Expert Systems; Logic for Knowledge
+Representation and Reasoning; Human Factors for Interactive System Design.  My
+dissertation investigated using genetic algorithms to learn logic programs and
+included software implement in Prolog.
+
+
+\centry{BA and MA, Computer Science}{Pembroke College, Cambridge University}{1983--1986}
+I undertook a variety of theoretical and practical computing courses.
+
+\subsection*{Technical Skills}
+
+I have used a wide variety of technologies. I research new techniques and
+technologies in order to make architectural decisions. Recent projects use the
+following languages, technologies and development tools: Python (Django,
+Aiohttp), Node.js (Hapi.js), GraphQL, Elasticsearch, Kibana, Logstash,
+Filebeats, Redis, RabbitMq, MySQL, Nginx, shell scripts, Make, linux, HTML,
+CSS, Json, \LaTeX, Docker (including compose and swarm), Kubernetes (on AWS
+clusters; and minikube for local development), Ksonnet/Jsonnet, Git, Jenkins,
+Bitbucket, Github, Gitlab, Jira, Confluence. I have a good understanding of
+linux, internet protocols and networking. I am familiar with agile software
+development and have a good understanding of Scrum.
+
+
+\end{document}
