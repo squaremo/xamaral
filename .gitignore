@@ -114,3 +114,5 @@ static-web/output/
 *.aux
 *.dvi
 *.out
+*.fbd_latexmk
+*.fls
