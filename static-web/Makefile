@@ -44,7 +44,7 @@ all: html
 	pdflatex  -file-line-error -interaction=nonstopmode -output-directory=content/images $*.tex
 
 
-html: tex/cv.pdf
+html: content/images/cv.pdf
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 
 clean:
