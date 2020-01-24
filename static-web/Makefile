@@ -37,18 +37,14 @@ help:
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
 	@echo '                                                                          '
 
-TOPTARGETS := all clean
+all: html 
 
-SUBDIRS := tex/
 
-$(TOPTARGETS): $(SUBDIRS)
+%.pdf:
+	pdflatex  -file-line-error -interaction=nonstopmode -output-directory=content/images $*.tex
 
-$(SUBDIRS):
-	$(MAKE) -C $@ $(MAKECMDGOALS)
 
-all: html
-
-html:
+html: tex/cv.pdf
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 
 clean:
