@@ -116,3 +116,4 @@ static-web/output/
 *.out
 *.fdb_latexmk
 *.fls
+/static-web/tex/*.pdf

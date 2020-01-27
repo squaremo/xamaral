@@ -75,13 +75,9 @@ else
 	$(PELICAN) -lr $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 endif
 
-publish:
-	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(PUBLISHCONF) $(PELICANOPTS)
+GIT_SHA ?= $(shell git rev-parse --short HEAD)
 
-
-GIT_SHA := $(shell git rev-parse --short HEAD)
-
-docker: publish
+docker: html
 	docker build . -t eu.gcr.io/xamaral/static-web:$(GIT_SHA)
 
 
