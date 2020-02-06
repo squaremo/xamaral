@@ -11,6 +11,7 @@ local configs = {
   cert_manager: (import './cert-manager.jsonnet'),
   comments: (import './comments.jsonnet'),
   k8s_sso: (import './k8s-sso.jsonnet'),
+  echo: import './echo.jsonnet',
   secretgen: (import './secretgen.jsonnet'),
   postgres: (import './postgres.jsonnet'),
   global_secret: import './sealed-secrets.json',
