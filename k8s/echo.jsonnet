@@ -33,7 +33,7 @@
             default: k.Container(name) {
               image: 'xamaral/echo',
               imagePullPolicy: 'Always',
-              ports: [{containerPort: 8000}],
+              ports: [{containerPort: 8080}],
             },
           },
         },
