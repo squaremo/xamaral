@@ -7,7 +7,7 @@
     target_pod: $.deployment.spec.template,
   },
 
-  ingress: k.Ingress(name) {
+  ingress: k.Ingress(name) + k.mixins.TlsIngress {
     spec+: {
       rules: [
         {
