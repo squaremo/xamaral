@@ -9,7 +9,7 @@ local configs = {
   static_site: (import './static-site.jsonnet'),
   ingress_controller: (import './nginx-ingress-controller.jsonnet'),
   cert_manager: (import './cert-manager.jsonnet'),
-  comments: (import './comments.jsonnet'),
+  // comments: (import './comments.jsonnet'),
   k8s_sso: (import './k8s-sso.jsonnet'),
   echo: import './echo.jsonnet',
   secretgen: (import './secretgen.jsonnet'),
