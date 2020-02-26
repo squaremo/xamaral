@@ -25,7 +25,7 @@ local zone = region + '-a';
         gcs: {
           bucket: tf_admin_project,
           prefix: 'terraform/state',
-          credentials: 'gloud-creds.json',
+          credentials: 'gcloud-creds.json',
         },
       },
     },
@@ -36,7 +36,7 @@ local zone = region + '-a';
       google: {
         project: project,
         region: region,
-        credentials: 'gloud-creds.json',
+        credentials: 'gcloud-creds.json',
       },
     },
 
