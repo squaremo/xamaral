@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "xamaral-tf-admin",
+  "private_key_id": "94318fba4604b4ef0f1845b5cfbb46f9eaa5af12",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCkmYPai8/rlW+4\nG8Fbxn8OyS7M6MK6br1GMUgvQGAO9HEkJGO1ThW9pqsm2BoeGtfaJCys+/4M3OZu\n5x+BEno8mqEuo+r2QhExOIL3o+qg/AzpupO0AQnmjDNK+62sKSMocHuxBKqQ9P79\nkeaD4VHxHtCeXgLlQv4WsUkPcvDFk1En1lu8XQuPxflPKNouDUMeHkPCUOh7VrB+\nTHy49arUdmz3OY4jHUKvfmeFc3WzBuF/k+nLMUhgCQ9/+z+5IAl/r27an49q0/A0\ny+blBl+HZ4W35fVVkPBCx595uGhbHFLmasq2tt+P+EiNsIR5RQAyHLB1u2u0nweW\nQmbI6q5ZAgMBAAECggEAHfYpx6rihp4Vj3xR5pxLvYvGfpsx8xC8WF4ZJyy/L4m0\nXKFZGwQjNfn0NqZonqlBOF6UWUqndHzzXyWoGO0dnhGBnIVO/FOLYJvKTzyhtXsb\n+KGzSDVWMYa8wX3tn6R/V1meUlsolylZjxuzS7dEnLEAxYsUWNooeUX9KBhClpwP\nB337LdxRy+wnXS/FNngY1xVSJLf2zakcjASkmAwd5jl0Mv37EDftbN64N9O1KXbN\nqzw+JPWfguR5svwiBc1UmNCqS9bkt8csCXoRH4FAUUy+RaufDByzSc72WjVTBLZn\nTwschPRjRs5036X8DSmSQlmkdruKBFrsyH5v6xJjOQKBgQDUeXKa/SAPlXlK8lnB\nE6Pv6AP5KjcivcyOhOOOHs1JRL5C2WEUlUeSvAFsXhpdpMiuvllv1auDR8bws0iL\nB0mjczb+nw7vkyVcBm/Fkx9OujyG7IlNE4iXqnR5gMpYHqThStgBvqAhAKZQT7Pr\nMfDaYXcC2GTe/OEg33NwuhDlrQKBgQDGUW1ib7Luu2nvUtaULa+hUdikZqJqK6DP\nk/0YmtnEBUQ10ufObrVCUcGbOqm/19KZEoo+XKlUKg8kOsyV8dqjl1biXUuI2xXr\nqvuwftzdkOXcvXrgzyezTcI6wI1iSRNeDHDbOsljlBnDfh8GrO+1aY7sqj7wYKOq\nBJVVdKMI3QKBgBug90AkLikYnL8cKIOs1CJ8HxglXyoLWDAoI5b1dmhSohL7RV5x\n0u7Ht7+ptO/8X4QpiGO8eyMFEF94ULSTbAXvE3WkpUKN9cuzopEkgmuwV/KLi4cU\nRSzDo4WxM56lzXbmTpRbf2MLPJUw6AprYhBjoCAkl2lPpM6rf81mxI+5AoGBAI/N\nAXTsK6Hh8Ymg1okxq3VdJKro5QH5SqzZ0R8jQZ5ad0BUAtP0AKjrIWjOm8HI3CM0\nh1t60yl9KeeKX0imy3PtzAltvtSoj/eHzuMGyl46sAJkvpH+g/oG+zyg3KQU+t8q\nRDcjJF55SEkxzYuIoHQ563H+bI7edC5XDnWdko5dAoGAPdSkgsa2VFoxw26l3JR6\nZPRdTky0Tu356iOrzk/KHdx0B9vWxkTOml4NN2Ed49zPLUQLmHNpwWvFtja6thkr\n8FPnc0eqYZ/25JManlzDrXPr7EogfbsunnFdqwtrJg7l1/cQ1oDB21BJl8LTEAXh\nL29FGgLuKTD4sCNVeonog5c=\n-----END PRIVATE KEY-----\n",
+  "client_email": "terraform@xamaral-tf-admin.iam.gserviceaccount.com",
+  "client_id": "113958176375449760691",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/terraform%40xamaral-tf-admin.iam.gserviceaccount.com"
+}
