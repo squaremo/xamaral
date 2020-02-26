@@ -34,10 +34,6 @@ local zone = region + '-a';
   'main.tf.json': {
     provider: {
       google: {
-        /* 
-         we're not providing credentials here - rather relying on 
-         the provider checking GOOGLE_APPLICATION_CREDENTIALS
-         */
         project: project,
         region: region,
         credentials: 'gloud-creds.json',
