@@ -3,7 +3,7 @@
 /* Some one time manual bootstrapping of service account and assocaited
 permisions is needed - see
 https://cloud.google.com/community/tutorials/managing-gcp-projects-with-terraform. Although
-note that just following those instructions still leads to permissions errors.
+note that just following those instructions still leads to permisions errors.
 I'll write up the correct steps once I'm confident I understand exactly what
 permissions are necessary
 
@@ -15,8 +15,8 @@ this has caused some permissions wrangling :/
 
 local tf_admin_project = 'xamaral-tf-admin';
 local project = 'xamaral';
-
-local zone = 'europe-west2-a';
+local region = 'europe-west2';
+local zone = region + '-a';
 
 {
   'backend.tf.json': {
@@ -25,6 +25,7 @@ local zone = 'europe-west2-a';
         gcs: {
           bucket: tf_admin_project,
           prefix: 'terraform/state',
+          credentials: 'gloud-creds.json',
         },
       },
     },
@@ -38,7 +39,8 @@ local zone = 'europe-west2-a';
          the provider checking GOOGLE_APPLICATION_CREDENTIALS
          */
         project: project,
-        region: 'europe-west',
+        region: region,
+        credentials: 'gloud-creds.json',
       },
     },
 
@@ -70,7 +72,6 @@ local zone = 'europe-west2-a';
           name: 'xamaral-k8s-node-pool',
           location: zone,
           cluster: '${google_container_cluster.primary.name}',
-          node_count: 1,
 
           autoscaling: {
             max_node_count: 5,
