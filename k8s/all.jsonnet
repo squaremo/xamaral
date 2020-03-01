@@ -13,7 +13,7 @@ local configs = {
   k8s_sso: (import './k8s-sso.jsonnet'),
   echo: import './echo.jsonnet',
   secretgen: (import './secretgen.jsonnet'),
-  postgres: (import './postgres.jsonnet'),
+  // postgres: (import './postgres.jsonnet'),
   global_secret: import './sealed-secrets.json',
   sealed_secrets_controller: import './sealed-secrets-controller.jsonnet',
   hello: import './hello.jsonnet',
