@@ -1,6 +1,29 @@
 (import 'kube-libsonnet/kube.libsonnet') {
 
   local t = self,
+  crds: {
+    elastic: {
+      $._Object(
+        'elasticsearch.k8s.elastic.co/v1', 'Elasticsearch', 'elastic'
+      ) +  {
+        spec: {
+          version: '7.6.0',
+          nodeSets: [{
+            name: 'default',
+            count: 1,
+            config: {
+              node: {
+                master: true,
+                data: true,
+                ingest: true,
+                store: {allow_mmap: false},
+              },
+            },
+          }],
+        },
+      }, 
+    }, // elastic
+  }, // crds
 
   mixins: {
     TlsIngress: {
