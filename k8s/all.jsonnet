@@ -18,6 +18,8 @@ local configs = {
   sealed_secrets_controller: import './sealed-secrets-controller.jsonnet',
   hello: import './hello.jsonnet',
   flux: import './flux.jsonnet',
+  eck: import './eck.jsonnet',
+  elastic: import './elastic.jsonnet',
 };
 
 {
