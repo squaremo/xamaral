@@ -19,8 +19,8 @@ local configs = {
   flux: import './flux.jsonnet',
   eck: import './eck.jsonnet',
   elastic: import './elastic.jsonnet',
-  blog_server: import './blog-server.jsonnet',
-  blog_ui: import './blog-ui.jsonnet',
+  // blog_server: import './blog-server.jsonnet',
+  // blog_ui: import './blog-ui.jsonnet',
 };
 
 {
