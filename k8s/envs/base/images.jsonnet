@@ -1,7 +1,6 @@
 {
   global:: {
     docker_registry: 'eu.gcr.io/xamaral/',
-    git_sha: std.extVar('git_sha'),
   },
 
   static_web: '%(docker_registry)sstatic-web:latest' % $.global,
