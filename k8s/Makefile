@@ -4,7 +4,7 @@ mkfile_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 kdir := ./envs/$(env)/
 
-KUBECFG := kubecfg -J $(mkfile_dir)
+KUBECFG := kubecfg -J $(mkfile_dir) --context $(env)
 JSONNET := jsonnet -J $(mkfile_dir)
 
 
