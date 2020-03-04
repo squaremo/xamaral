@@ -3,6 +3,7 @@
    https://github.com/fluxcd/flux/blob/master/deploy/
    */
   local k = $.k,
+  local env = $.env,
   local name = 'flux',
 
   # seems that this has to be the name. not sure why
@@ -45,6 +46,9 @@
                 '--git-email=paul+flux@rudin.co.uk',
                 '--manifest-generation=true',
               ],
+              env_: {
+                ENV: env,
+              },
             },
           },
           volumes_+: {
