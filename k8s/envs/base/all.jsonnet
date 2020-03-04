@@ -3,6 +3,7 @@ local globals = {
   secrets:: import 'secrets.json',
   root_dns_name:: 'xamaral.com',
   k:: import 'klib.libsonnet',
+  env:: std.extVar("env"),
 };
 
 local configs = {
