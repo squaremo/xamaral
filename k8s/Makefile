@@ -1,16 +1,20 @@
-GIT_SHA := $(shell git rev-parse --short HEAD)
+kdir := ./envs/$(env)/
 
-sealed-secrets.json: secrets.jsonnet secrets.json
+
+$(kdir)sealed-secrets.json: $(kdir)secrets.jsonnet $(kdir)/secrets.json
 	jsonnet -e "(import 'secrets.jsonnet').global_secret"|kubeseal --cert kubeseal-public-cert.pem -o json > sealed-secrets.json
 
-show: sealed-secrets.json
-	kubecfg show -V git_sha=$(GIT_SHA) all.jsonnet
+show: $(kdir)sealed-secrets.json
+	cd $(kdir)
+	kubecfg show all.jsonnet
 
-update: sealed-secrets.json
-	kubecfg update -V git_sha=$(GIT_SHA) --ignore-unknown all.jsonnet
+update: $(kdir)sealed-secrets.json
+	cd $(kdir)
+	kubecfg update --ignore-unknown all.jsonnet
 
 diff:
-	kubecfg diff --diff-strategy=subset -V git_sha=$(GIT_SHA) all.jsonnet
+	cd $(kdir)
+	kubecfg diff --diff-strategy=subset all.jsonnet
 
 
 JS_FILES := $(wildcard *.jsonnet)
