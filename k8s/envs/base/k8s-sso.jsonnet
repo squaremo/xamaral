@@ -1,6 +1,6 @@
 {
   local sso = self,
-  local k = $.k,
+  local k = $.globals.k,
   local name = 'k8s-sso',
   local port = 8080,
   local host = '%s.%s' % [name, $.root_dns_name],
@@ -24,7 +24,7 @@
         spec+: {
           containers_+: {
             default: k.Container(name) {
-              image: $.images.k8s_sso,
+              image: $.globals.images.k8s_sso,
               imagePullPolicy: 'Always',
               ports: [{ containerPort: 8080 }],
               env_+: {

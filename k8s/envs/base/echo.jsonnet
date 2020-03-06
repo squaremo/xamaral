@@ -1,8 +1,8 @@
 {
   local name = 'echo',
-  local k = $.k,
+  local k = $.globals.k,
   local s = self,
-  local host = '%s.%s' % [name, $.root_dns_name],
+  local host = '%s.%s' % [name, $.globals.root_dns_name],
   svc: k.Service(name) {
     target_pod: $.deployment.spec.template,
   },
@@ -31,7 +31,7 @@
         spec+: {
           containers_+: {
             default: k.Container(name) {
-              image: 'xamaral/echo',
+              image: $.globals.images.echo,
               imagePullPolicy: 'Always',
               ports: [{containerPort: 8080}],
             },

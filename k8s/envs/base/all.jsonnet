@@ -1,12 +1,4 @@
-local globals = {
-  images:: import 'images.jsonnet',
-  secrets:: import 'secrets.json',
-  root_dns_name:: 'xamaral.com',
-  k:: import 'klib.libsonnet',
-  env:: std.extVar("env"),
-};
-
-local configs = {
+local config = {
   static_site: import 'static-site.jsonnet',
   ingress_controller: import 'nginx-ingress-controller.jsonnet',
   cert_manager: import 'cert-manager.jsonnet',
@@ -22,9 +14,17 @@ local configs = {
   elastic: import 'elastic.jsonnet',
   // blog_server: import 'blog-server.jsonnet',
   // blog_ui: import 'blog-ui.jsonnet',
+  globals:: {
+    images:: import 'images.jsonnet',
+    secrets:: import 'secrets.json',
+    root_dns_name:: 'xamaral.com',
+    k:: import 'klib.libsonnet',
+    env:: std.extVar("env"),
+  },
 };
 
-{
-  [k]: globals + configs[k]
-  for k in std.objectFields(configs)
+config + {
+  local s = self, 
+  [k]: config[k] + {globals:: s.globals},
+  for k in std.objectFields(config)
 }

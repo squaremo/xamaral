@@ -12,4 +12,5 @@
   k8s_sso: 'xamaral/k8s-sso:latest',
   flux: 'xamaral/fluxkcfg:cc94941',
   flux_memcached: 'memcached:1.5.15',
+  echo: 'xamaral/echo',
 }

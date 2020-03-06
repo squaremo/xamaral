@@ -1,8 +1,7 @@
 local name = 'static-web';
-local host = 'xamaral.com';
 
 {
-  local k = $.k,
+  local k = $.globals.k,
 
   svc: k.Service(name) {
     target_pod: $.deploy.spec.template,
@@ -12,7 +11,7 @@ local host = 'xamaral.com';
     spec+: {
       rules: [
         {
-          host: host,
+          host: $.globals.root_dns_name,
           http: {
             paths: [
               {
@@ -35,7 +34,7 @@ local host = 'xamaral.com';
         spec+: {
           containers_+: {
             nginx: k.Container('nginx') {
-              image: $.images.static_web,
+              image: $.globals.images.static_web,
               resources: {
                 requests: { cpu: '100m', memory: '100Mi' },
               },

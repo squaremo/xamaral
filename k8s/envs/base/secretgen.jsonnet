@@ -1,7 +1,7 @@
 local name = 'secretgen';
 local namespace = 'kube-system';
 {
-  local k = $.k,
+  local k = $.globals.k,
 
   deployment: k.Deployment(name) {
     metadata+: {
@@ -14,7 +14,7 @@ local namespace = 'kube-system';
           serviceAccountName: name,
           containers_: {
             secretgen: {
-              image: $.images.secret_gen,
+              image: $.globals.images.secret_gen,
               command: ['/kubernetes-secret-generator'],
               // 32 because oauth2-proxy cookie secret can only be certain lengths
               args: ['-logtostderr', '-all-namespaces', '-regenerate-insecure', '-secret-length=32'],
