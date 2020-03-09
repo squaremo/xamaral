@@ -1,7 +1,6 @@
 {
   global:: {
     docker_registry: 'eu.gcr.io/xamaral/',
-    git_sha: std.extVar('git_sha'),
   },
 
   static_web: '%(docker_registry)sstatic-web:latest' % $.global,
@@ -11,6 +10,7 @@
   secret_gen: 'quay.io/mittwald/kubernetes-secret-generator:latest',
   // postgres: 'postgres:11.4',
   k8s_sso: 'xamaral/k8s-sso:latest',
-  flux: 'xamaral/fluxkcfg:f80cb87',
+  flux: 'xamaral/fluxkcfg:cc94941',
   flux_memcached: 'memcached:1.5.15',
+  echo: 'xamaral/echo',
 }

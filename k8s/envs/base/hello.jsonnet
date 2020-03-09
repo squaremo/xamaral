@@ -1,9 +1,9 @@
 // for testing
 {
   local name = 'hello',
-  local k = $.k,
+  local k = $.globals.k,
   local s = self,
-  local host = '%s.%s' % [name, $.root_dns_name],
+  local host = '%s.%s' % [name, $.globals.root_dns_name],
   svc: k.Service(name) {
     target_pod: $.deployment.spec.template,
   },

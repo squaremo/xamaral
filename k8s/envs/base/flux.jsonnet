@@ -2,7 +2,8 @@
   /* see the flux repo on github for some example plain yamls
    https://github.com/fluxcd/flux/blob/master/deploy/
    */
-  local k = $.k,
+  local k = $.globals.k,
+  local env = $.globals.env,
   local name = 'flux',
 
   # seems that this has to be the name. not sure why
@@ -24,7 +25,7 @@
           serviceAccountName: name,
           containers_+: {
             default: k.Container(name) + {
-              image: $.images.flux,
+              image: $.globals.images.flux,
               volumeMounts_+: {
                 git_key: {
                   mountPath: '/etc/fluxd/ssh',
@@ -45,6 +46,9 @@
                 '--git-email=paul+flux@rudin.co.uk',
                 '--manifest-generation=true',
               ],
+              env_: {
+                ENV: env,
+              },
             },
           },
           volumes_+: {
@@ -105,7 +109,7 @@
         spec+: {
           containers_+: {
             default: k.Container('memcached') {
-              image: $.images.flux_memcached,
+              image: $.globals.images.flux_memcached,
               args: [
                 '-m 512',
                 '-I 5m',

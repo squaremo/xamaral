@@ -3,7 +3,7 @@
  */
 
 
-local k = import 'kube-libsonnet/kube.libsonnet';
+local k = import 'klib.libsonnet';
 local secrets = import './secrets.json';
 {
   global_secret: k.Secret('global-secrets') {

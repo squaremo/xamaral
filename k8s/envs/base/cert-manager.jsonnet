@@ -8,7 +8,7 @@ github.com:bitnami/kube-prod-runtime (apache 2 license)
 
 
 {
-  local kube = $.k,
+  local kube = $.globals.k,
   p:: '',
   metadata:: {
     metadata+: {
@@ -214,7 +214,7 @@ github.com:bitnami/kube-prod-runtime (apache 2 license)
           serviceAccountName: $.sa.metadata.name,
           containers_+: {
             default: kube.Container('cert-manager') {
-              image: $.images.cert_manager,
+              image: $.globals.images.cert_manager,
               args_+: {
                 'cluster-resource-namespace': '$(POD_NAMESPACE)',
                 'leader-election-namespace': '$(POD_NAMESPACE)',
