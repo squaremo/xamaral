@@ -41,19 +41,6 @@ local secretname = 'ca-key-pair';
       k._Object("certmanager.k8s.io/v1alpha2" ,"ClusterIssuer","ca-issuer") + {
         spec+: {ca: {secretName: secretname}}
       },
-      
-      k._Object('certmanager.k8s.io/v1alpha2' ,'Certificate', 'xamaral-test') + {
-        spec+: {
-          secretName: secretname,
-          issuerRef: {
-            name: 'ca-issuer',
-            kind: 'ClusterIssuer',
-          },
-          commonName: '*.xamaral.test',
-          organization: ['xamaral.test'],
-          dnsNames: ['*.xamaral.test'],
-        },
-      },
     ],
   },
 }
