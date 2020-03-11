@@ -50,8 +50,8 @@
       metadata+: {
         annotations+: {
           "kubernetes.io/ingress.class": "nginx",
-          "certmanager.k8s.io/cluster-issuer": "letsencrypt-prod",
-          "certmanager.k8s.io/acme-challenge-type": "http01",
+          "cert-manager.io/cluster-issuer": "letsencrypt-prod",
+          "cert-manager.io/acme-challenge-type": "http01",
         },
       },
       spec+: {
@@ -70,7 +70,7 @@
       metadata+: {
         annotations+: {
           'nginx.ingress.kubernetes.io/auth-signin': '%sstart?rd=$escaped_request_uri' % s.auth_endpoint,
-          'nginx.ingress.kubernetes.io/auth-url': s.auth_endpoint + 'auth',
+          'nginx.ingress.kubernetes.io/auth-url': 'http://k8s-sso.default.svc.cluster.local:8080/oauth2/auth',
           "nginx.ingress.kubernetes.io/auth-response-headers": "X-Auth-ID",
         },
       },
