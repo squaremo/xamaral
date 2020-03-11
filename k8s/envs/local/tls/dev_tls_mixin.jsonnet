@@ -1,7 +1,7 @@
 local secretname = 'ca-key-pair';
 
 /* We can't use let's encrypt for dev machines so create an self-signing issuer. 
-
+ See: https://docs.cert-manager.io/en/release-0.8/tasks/issuers/setup-ca.html
  */
 
 
@@ -57,29 +57,3 @@ local secretname = 'ca-key-pair';
     ],
   },
 }
-
-/*
-
-local no_tls_mixin = {
-  metadata+: {
-    annotations+: {
-      'nginx.ingress.kubernetes.io/ssl-redirect': 'false'
-    },
-  },
-};
-
-local isK8s(o) = std.objectHas(o, "kind");
-
-local remove_tls_from_ingress(o) = (
-  if isK8s(o) && o.kind == "Ingress" then o + no_tls_mixin else o
-);
-
-local remove_all_ingress_tls(objs) = (
-  if std.isObject(objs) then if isK8s(objs) then remove_tls_from_ingress(objs) else {
-    [k]: remove_all_ingress_tls(objs[k]) for k in std.objectFields(objs)
-  } else if std.isArray(objs) then [remove_all_ingress_tls(o) for o in objs]
-  else objs
-);
-
-remove_all_ingress_tls(config)
-*/
