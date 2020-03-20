@@ -117,3 +117,7 @@ static-web/output/
 *.fdb_latexmk
 *.fls
 /static-web/tex/*.pdf
+
+
+# sealed secrets are generated, so we don't commit them
+*.sealed.json

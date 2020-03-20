@@ -1,2 +1,2 @@
-secrets.json filter=git-crypt diff=git-crypt
+*secrets.json filter=git-crypt diff=git-crypt
 tf/gcloud-creds.json filter=git-crypt diff=git-crypt

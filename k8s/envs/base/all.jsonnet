@@ -6,7 +6,7 @@ local config = {
   echo: import 'echo.jsonnet',
   secretgen: import 'secretgen.jsonnet',
   // postgres: import 'postgres.jsonnet',
-  global_secret: import 'sealed-secrets.json',
+  global_secret: import 'globalsecrets.sealed.json',
   sealed_secrets_controller: import 'sealed-secrets-controller.jsonnet',
   hello: import 'hello.jsonnet',
   flux: import 'flux.jsonnet',

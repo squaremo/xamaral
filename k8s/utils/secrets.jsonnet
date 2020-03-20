@@ -4,9 +4,8 @@
 
 
 local k = import 'klib.libsonnet';
-local secrets = import './secrets.json';
-{
-  global_secret: k.Secret('global-secrets') {
+
+function(secrets, secret_name)
+   k.Secret(secret_name) + {
     data_+: secrets,
-  },
-}
+   }
