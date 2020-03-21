@@ -5,10 +5,10 @@ mkfile_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 kdir := ./envs/$(env)/
 
 KUBECFG := kubecfg -V "env=$(env)" -J $(mkfile_dir) --context $(env)
-JSONNET := jsonnet -J $(mkfile_dir) 
+JSONNET := jsonnet -J $(mkfile_dir)
 
 %secrets.sealed.json: %secrets.json
-	$(JSONNET) --tla-code-file 'secrets=$<' --tla-str 'secret_name=$*' utils/secrets.jsonnet|kubeseal --cert $(@D)/kubeseal-public-cert.pem -o json > $@
+	$(JSONNET) --tla-code-file 'secrets=$<' utils/secrets.jsonnet|kubeseal --cert $(@D)/kubeseal-public-cert.pem -o json > $@
 
 show:
 	cd $(kdir)

@@ -16,7 +16,6 @@ local config = {
   // blog_ui: import 'blog-ui.jsonnet',
   globals:: {
     images:: import 'images.jsonnet',
-    secrets:: import 'secrets.json',
     root_dns_name:: 'xamaral.com',
     k:: import 'klib.libsonnet',
     env:: std.extVar("env"),
