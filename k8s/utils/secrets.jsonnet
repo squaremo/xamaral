@@ -15,11 +15,11 @@ function(secrets) (
    'Opaque'.  Either supply a data field, in which case it'll be base64 encoded
    for you, or a raw_data field, in which case the values should already be
    base64 encoded */
- 
-  local s = {type: 'Opaque'} + secrets;
-  k.Secret(s.name) + {
-    [if "data" in s then "data_+"]: s.data,
-    [if "raw_data" in s then "data"]: s.raw_data,
-    type: s.type,
-  }
+  local s = {
+    [if "data" in secrets then "data_"]:: secrets.data,
+    [if "raw_data" in secrets then "data"]: secrets.raw_data,
+    [if "type" in secrets then "type"]: secrets.type,
+  };
+
+  k.Secret(secrets.name) + s 
 )
