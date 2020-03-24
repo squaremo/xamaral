@@ -17,6 +17,7 @@ local tf_admin_project = 'xamaral-tf-admin';
 local project = 'xamaral';
 local region = 'europe-west2';
 local zone = region + '-a';
+local creds_file = 'gcloudsecrets.json';
 
 {
   'backend.tf.json': {
@@ -25,7 +26,7 @@ local zone = region + '-a';
         gcs: {
           bucket: tf_admin_project,
           prefix: 'terraform/state',
-          credentials: 'gcloud-creds.json',
+          credentials: creds_file,
         },
       },
     },
@@ -36,7 +37,7 @@ local zone = region + '-a';
       google: {
         project: project,
         region: region,
-        credentials: 'gcloud-creds.json',
+        credentials: creds_file,
       },
     },
 
