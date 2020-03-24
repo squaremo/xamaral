@@ -74,4 +74,5 @@ local config = (
   disable_ic_mixin + dev_tls_mixin
 );
 
-walk_objs(config) + {gcr_secret: gcr_secret, global_secret: import 'globalsecrets.sealed.json'}
+walk_objs(config)
++ {gcr_secret: gcr_secret, global_secret: import 'globalsecrets.sealed.json'}
