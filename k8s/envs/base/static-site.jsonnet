@@ -32,6 +32,7 @@ local name = 'static-web';
       annotations+: {
         'fluxcd.io/automated': "true",
         'fluxcd.io/tag.nginx': 'semver:~0',
+        'xamaral.com/test': "test",
       },
     },
     spec+: {
