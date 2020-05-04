@@ -2,3 +2,4 @@ version: 1
 commandUpdated:
   generators:
     - command: 'cd ../.. && make env=prod show'
+  patchFile: flux-patch.yaml
