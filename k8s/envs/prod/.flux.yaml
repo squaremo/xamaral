@@ -1,4 +1,4 @@
 version: 1
 commandUpdated:
   generators:
-    - command: make env=prod show all.jsonnet
+    - command: 'cd ../.. && make env=prod show all.jsonnet'
