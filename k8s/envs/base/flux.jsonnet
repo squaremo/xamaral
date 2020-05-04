@@ -3,19 +3,29 @@
    https://github.com/fluxcd/flux/blob/master/deploy/
    */
   local k = $.globals.k,
-  local env = $.globals.env,
-  local name = 'flux',
 
-  # seems that this has to be the name. not sure why
-  local secret_name = 'flux-git-deploy',
 
-  local kgdir = '/var/fluxd/keygen',
+  _config:: {
+
+    # seems that this has to be the name. not sure why
+    secret_name: 'flux-git-deploy',
+
+    name: 'flux',
+    env: $.globals.env,
+    image: $.globals.images.flux,
+    namespace: 'flux',
+    git_label: 'flux-sync',
+    branch: 'master',
+  },
+
   local nsmix = {
     metadata+: {
-      namespace: 'flux',
+      namespace: $._config.namespace,
     },
   },
 
+  local name = $._config.name,
+  local kgdir = '/var/fluxd/keygen',  
   ns: k.Namespace(name),
 
   deployment: k.Deployment(name) + nsmix + {
@@ -25,7 +35,7 @@
           serviceAccountName: name,
           containers_+: {
             default: k.Container(name) + {
-              image: $.globals.images.flux,
+              image: $._config.image,
               volumeMounts_+: {
                 git_key: {
                   mountPath: '/etc/fluxd/ssh',
@@ -41,20 +51,20 @@
                 '--ssh-keygen-dir=%s' % kgdir,
                 '--git-url=git@github.com:PaulRudin/xamaral',
                 '--git-path=k8s',
-                '--git-branch=master',
-                '--git-label=flux-sync',
+                '--git-branch=%s' % $._config.branch,
+                '--git-label=%s' % $._config.git_label,
                 '--git-email=paul+flux@rudin.co.uk',
                 '--manifest-generation=true',
               ],
               env_: {
-                ENV: env,
+                ENV: $._config.env,
               },
             },
           },
           volumes_+: {
             git_key: {
               secret: {
-                secretName: secret_name,
+                secretName: $._config.secret_name,
                 defaultMode: std.parseOctal('0400'),
               },
             },
@@ -70,7 +80,7 @@
     },
   }, //deployment
 
-  secret: k.Secret(secret_name) + nsmix,
+  secret: k.Secret($._config.secret_name) + nsmix,
 
   sa: k.ServiceAccount(name) + nsmix,
 

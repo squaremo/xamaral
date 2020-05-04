@@ -30,6 +30,10 @@ local name = 'static-web';
   deploy: k.Deployment(name) {
     spec+: {
       replicas: 1,
+      metadata+: {
+        'fluxcd.io/automated': "true",
+        'fluxcd.io/tag.nginx': 'semver:~0',
+      },
       template+: {
         spec+: {
           containers_+: {
