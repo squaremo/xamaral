@@ -50,7 +50,7 @@
                 '--memcached-service=',
                 '--ssh-keygen-dir=%s' % kgdir,
                 '--git-url=git@github.com:PaulRudin/xamaral',
-                '--git-path=k8s/%s' % $._config.env,
+                '--git-path=k8s/envs/%s' % $._config.env,
                 '--git-branch=%s' % $._config.branch,
                 '--git-label=%s' % $._config.git_label,
                 '--git-email=paul+flux@rudin.co.uk',
