@@ -28,12 +28,14 @@ local name = 'static-web';
     },
   },
   deploy: k.Deployment(name) {
-    spec+: {
-      replicas: 1,
-      metadata+: {
+    metadata+: {
+      annotations+: {
         'fluxcd.io/automated': "true",
         'fluxcd.io/tag.nginx': 'semver:~0',
       },
+    },
+    spec+: {
+      replicas: 1,
       template+: {
         spec+: {
           containers_+: {

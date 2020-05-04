@@ -16,7 +16,7 @@ show:
 
 update:
 	cd $(kdir)
-	$(KUBECFG) update --ignore-unknown all.jsonnet
+	$(KUBECFG)  update  --ignore-unknown --validate=false all.jsonnet
 
 diff:
 	cd $(kdir)
