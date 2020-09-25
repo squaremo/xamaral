@@ -45,6 +45,20 @@
           name: 'elastic',
         }
       }  
+    },
+    AcmeClusterIssuer(name, email, server): $._Object(
+      'cert-manager.io/v1', 'ClusterIssuer', name
+    ) + {
+      spec+: {
+        acme: {
+          email: email,
+          server: server,
+          privateKeySecretRef: {
+            name: name + '-clusterissuer-account-key',
+          },
+          solvers: [{http01: {ingress: {class: 'nginx'}}}],
+        }
+      }
     }
   }, // crds
 

@@ -22,6 +22,9 @@ diff:
 	cd $(kdir)
 	$(KUBECFG) diff --diff-strategy=subset all.jsonnet
 
+delete:
+	cd $(kdir)
+	$(KUBECFG) delete all.jsonnet
 
 JS_FILES := $(wildcard *.jsonnet)
 
