@@ -15,8 +15,8 @@ this has caused some permissions wrangling :/
 
 local tf_admin_project = 'xamaral-tf-admin';
 local project = 'xamaral';
-local region = 'europe-west2';
-local zone = region + '-a';
+local region = 'europe-west1';
+local zone = region + '-c';
 local creds_file = 'gcloudsecrets.json';
 
 {
@@ -77,7 +77,7 @@ local creds_file = 'gcloudsecrets.json';
           node_config: {
             // just whilst we're getting going
             preemptible: true,
-            machine_type: 'g1-small',
+            machine_type: 'e2-small',
 
             metadata: {
               'disable-legacy-endpoints': true,
