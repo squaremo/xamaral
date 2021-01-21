@@ -11,7 +11,7 @@ local config = {
   hello: import 'hello.jsonnet',
   flux: import 'flux.jsonnet',
   eck: import 'eck.jsonnet',
-  elastic: import 'elastic.jsonnet',
+  //elastic: import 'elastic.jsonnet',
   // blog_server: import 'blog-server.jsonnet',
   // blog_ui: import 'blog-ui.jsonnet',
   globals:: {
