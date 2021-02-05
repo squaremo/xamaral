@@ -1,97 +1,91 @@
 // invoke with: jsonnet -m . tf.jsonnet
 
-/* Some one time manual bootstrapping of service account and assocaited
-permisions is needed - see
-https://cloud.google.com/community/tutorials/managing-gcp-projects-with-terraform. Although
-note that just following those instructions still leads to permisions errors.
-I'll write up the correct steps once I'm confident I understand exactly what
-permissions are necessary
-
-*/
-
-/* docs suggest keeping the project for the terraform state seperate - although
-this has caused some permissions wrangling :/
-*/
-
-local tf_admin_project = 'xamaral-tf-admin';
 local project = 'xamaral';
-local region = 'europe-west1';
-local zone = region + '-c';
-local creds_file = 'gcloudsecrets.json';
+local tags = {
+  tags+: {
+    managed_by: 'terraform',
+  },
+};
 
 {
   'backend.tf.json': {
-    terraform: {
+    terraform+: {
       backend: {
-        gcs: {
-          bucket: tf_admin_project,
-          prefix: 'terraform/state',
-          credentials: creds_file,
+        remote: {
+          organization: 'xamaral',
+          workspaces: {
+            name: 'xamaral'
+          },
         },
       },
     },
   },
 
   'main.tf.json': {
-    provider: {
-      google: {
-        project: project,
-        region: region,
-        credentials: creds_file,
+    terraform+: {
+      required_providers+: {
+        azurerm: {
+          source: 'hashicorp/azurerm',
+          version: '=2.46.0',
+        },
+      },
+    },
+    
+    provider+: {
+      azurerm: {
+        // seems to be necessary
+        features: {},
       },
     },
 
-    resource: {
+    
+    resource+: {
 
-      google_container_cluster: {
-        primary: {
+      azurerm_resource_group: {
+        [project]: {
+          name: project,
+          location: 'West Europe',
+        },
+      },
 
-          name: 'xamaral',
-          location: zone,
+      local rg = {
+        resource_group_name: '${azurerm_resource_group.%s.name}' % project,
+        location: '${azurerm_resource_group.%s.location}' % project,
+      },
 
-
-          // See comments at https://www.terraform.io/docs/providers/google/r/container_cluster.html
-          remove_default_node_pool: true,
-          initial_node_count: 1,
-
-          master_auth: {
-            username: '',
-            password: '',
-            client_certificate_config: {
-              issue_client_certificate: false,
-            },
+      // default mixin for all resources
+      local m = tags + rg,
+      
+      azurerm_kubernetes_cluster+: {
+        [project]: m + {
+          name: project,
+          dns_prefix: project,
+          identity: {
+            type: 'SystemAssigned',
+          },
+          // we're required to have a default node pool.
+          // we add a pool for spot VMs below.
+          default_node_pool: {
+            name: 'default',
+            vm_size: 'standard_b2s',
+            node_count: 1,
           },
         },
       },
 
-      google_container_node_pool: {
-        primary_nodes: {
-          name: 'xamaral-k8s-node-pool',
-          location: zone,
-          cluster: '${google_container_cluster.primary.name}',
-
-          autoscaling: {
-            max_node_count: 5,
-            min_node_count: 1,
-          },
-          node_config: {
-            // just whilst we're getting going
-            preemptible: true,
-            machine_type: 'e2-small',
-
-            metadata: {
-              'disable-legacy-endpoints': true,
-            },
-
-            oauth_scopes: [
-              'https://www.googleapis.com/auth/logging.write',
-              'https://www.googleapis.com/auth/monitoring',
-              'https://www.googleapis.com/auth/devstorage.read_only',
-
-              # needed for external dns
-              'https://www.googleapis.com/auth/ndev.clouddns.readwrite',
-            ],
-
+      azurerm_kubernetes_cluster_node_pool+: {
+        spot: tags + {
+          name: 'spot',
+          kubernetes_cluster_id: '${azurerm_kubernetes_cluster.%s.id}' % project,
+          vm_size: 'standard_a2_v2',
+          priority: 'Spot',
+          eviction_policy: 'Delete',
+          spot_max_price: -1,
+          enable_auto_scaling: true,
+          min_count: 1,
+          max_count: 5,
+          lifecycle: {
+            ignore_changes: ['node_count'],
           },
         },
       },
