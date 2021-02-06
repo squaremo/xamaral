@@ -3,6 +3,13 @@
 mkfile_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 kdir := ./envs/$(env)/
+gendir := ./gen/$(env)/
+JS_FILES := $(wildcard *.jsonnet)
+
+
+$(gendir)all.yaml: $(JS_FILES)
+	$(KUBECFG) show $(kdir)all.jsonnet > $@
+
 
 KUBECFG := kubecfg -V "env=$(env)" -J $(mkfile_dir) --context $(env)
 JSONNET := jsonnet -J $(mkfile_dir)
@@ -25,8 +32,6 @@ diff:
 delete:
 	cd $(kdir)
 	$(KUBECFG) delete all.jsonnet
-
-JS_FILES := $(wildcard *.jsonnet)
 
 fmt: $(JS_FILES:%=%-fmt)
 fmttest: $(JS_FILES:%=%-fmttest)
