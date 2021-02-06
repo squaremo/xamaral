@@ -1,0 +1,18 @@
+{
+  "dnsZone": "xamaral.com",
+  "contactEmail": "paul@rudin.co.uk",
+  "externalDns": {
+    "tenantId": "c97a4299-3ee4-4eab-8ab3-4bca7c6fc44d",
+    "subscriptionId": "bbe98899-5220-4ff1-9df4-d16664cc775c",
+    "aadClientId": "8af92d24-707b-44e1-8e6b-b4491913b39e",
+    "aadClientSecret": "zXTrZEd4rUXoizS4",
+    "resourceGroup": "xamaral"
+  },
+  "oauthProxy": {
+    "client_id": "47ce2bbf-1176-480b-ae00-6241f571ee74",
+    "client_secret": "WWLK+M77pp1GlMOAVAO3i4o7",
+    "cookie_secret": "loqc9WDRXB+JyQSOTk4ytAflWf5rxOJS",
+    "authz_domain": "*",
+    "azure_tenant": "c97a4299-3ee4-4eab-8ab3-4bca7c6fc44d"
+  }
+}

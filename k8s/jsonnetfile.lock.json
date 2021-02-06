@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/bitnami-labs/kube-libsonnet.git",
+          "subdir": ""
+        }
+      },
+      "version": "724b7ae3c3fdc270f6f67f66965eaae3a8fd81d3",
+      "sum": "wGkeAgKXnDhZngw09PW8+U2x2GWyI0ZxAZF/Q7i49bE="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/bitnami-labs/kubernetes-grafana-dashboards.git",
+          "subdir": ""
+        }
+      },
+      "version": "a2c22c0858ffd6ad1aef5ae344831711456b5b01",
+      "sum": "SPPYXZApI8JiXDKwq2GqwQUZCpud0CLWqrEIxVdlsLE="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/bitnami/kube-prod-runtime.git",
+          "subdir": "manifests"
+        }
+      },
+      "version": "7cfbc1bb1f8a5bb774ecff0c77ab86c6aa7ab1b1",
+      "sum": "NVrkFTRutPHjfRsmIpi9hw73gOohZ/bFT0SQpJq73Ek="
+    }
+  ],
+  "legacyImports": false
+}
