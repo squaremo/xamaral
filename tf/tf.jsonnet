@@ -90,6 +90,15 @@ local tags = {
           enable_auto_scaling: true,
           min_count: 0,
           max_count: 5,
+          // added if not specified, so put them here to avoid diffs
+          node_labels: {
+          "kubernetes.azure.com/scalesetpriority": "spot",
+          },
+
+          // also added automatically
+          node_taints: [
+            "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
+          ],          
           lifecycle: {
             ignore_changes: ['node_count'],
           },
