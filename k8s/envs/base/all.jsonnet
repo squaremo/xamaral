@@ -1,5 +1,4 @@
 local config = {
-  secretgen: import 'secretgen.jsonnet',
   bkpr: import './kubeprod-manifest.jsonnet',
   globals:: {
     images:: import 'images.jsonnet',
