@@ -1,5 +1,0 @@
-version: 1
-patchUpdated:
-  generators:
-    - command: kubecfg -V "env=prod" show -J ../.. -J ../../vendor all.jsonnet
-  patchFile: flux-patch.yaml
