@@ -1,4 +1,6 @@
 local config = {
+  livefpl: import './livefpl.jsonnet',
+  
   bkpr: import './kubeprod-manifest.jsonnet',
   globals:: {
     images:: import 'images.jsonnet',
