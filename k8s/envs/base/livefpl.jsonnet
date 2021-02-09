@@ -6,16 +6,16 @@
     spec+: {
       template+: {
         spec+: {
+          imagePullSecrets: [{
+            // NB - currently this secret is manually provisioned
+            name: 'ghcrcred',
+          }],
           containers_+: {
             default: k.Container(name) + {
               ports_+: {
                 http: { containerPort: 8080 },
               },
               image: $.globals.images.livefpl,
-              imagePullSecrets: [{
-                // NB - currently this secret is manually provisioned
-                name: 'ghcrcred',
-              }],
             },
           },
         },
