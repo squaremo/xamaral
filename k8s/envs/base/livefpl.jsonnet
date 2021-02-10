@@ -13,7 +13,7 @@
           containers_+: {
             default: k.Container(name) + {
               ports_+: {
-                http: { containerPort: 8080 },
+                http: { containerPort: 8000 },
               },
               image: $.globals.images.livefpl,
             },
