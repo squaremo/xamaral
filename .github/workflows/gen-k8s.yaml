@@ -1,0 +1,21 @@
+name: Regenerate K8S manifests
+on: push
+
+jobs:
+  run:
+    name: Regen K8S
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up kubecfg
+        run: ./scripts/install_kubecfg.sh
+
+      - name: Regenerate manifests
+        run: cd k8s && make prod
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+
+          
