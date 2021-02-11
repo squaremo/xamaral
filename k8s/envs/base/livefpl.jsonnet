@@ -3,7 +3,7 @@
   local name = 'livefpl',
   local fs_ns_mixin = {
     metadata+: {
-      namespace: 'flus-system',
+      namespace: 'flux-system',
     },
   },
   // NB - currently this secret is manually provisioned
