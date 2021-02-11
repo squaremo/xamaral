@@ -1,3 +1,3 @@
 {
-  livefpl:: 'ghcr.io/paulrudin/livefpl:v0.0.1-8',
+  livefpl:: 'ghcr.io/paulrudin/livefpl:v0.0.9',
 }
