@@ -1,6 +1,7 @@
 (import 'kube-libsonnet/kube.libsonnet') {
 
   local t = self,
+
   crds: {
     ImageRepository(name): $._Object(
       'image.toolkit.fluxcd.io/v1alpha1', 'ImageRepository', name
@@ -10,14 +11,14 @@
       'image.toolkit.fluxcd.io/v1alpha1', 'ImagePolicy', name
     ) + {
       spec+: {
-        imageRepositoryRef: {name: name},
+        imageRepositoryRef: { name: name },
         policy: error 'policy required',
-      }
+      },
     },
 
     Elasticsearch(name): $._Object(
       'elasticsearch.k8s.elastic.co/v1', 'Elasticsearch', name,
-    ) +  {
+    ) + {
       spec: {
         version: '7.6.0',
         nodeSets: [{
@@ -28,12 +29,12 @@
               master: true,
               data: true,
               ingest: true,
-              store: {allow_mmap: false},
+              store: { allow_mmap: false },
             },
           },
         }],
       },
-    }, // elastic
+    },  // elastic
     Kibana(name): $._Object(
       'kibana.k8s.elastic.co/v1', 'Kibana', name
     ) + {
@@ -47,17 +48,17 @@
            don't really need another layer of tls here, be careful if your
            setup is different - you could end up with an way to avoid https
            altogether */
-          tls: { selfSignedCertificate: {disabled: true}}
+          tls: { selfSignedCertificate: { disabled: true } },
         },
-          
+
         elasticsearchRef: {
 
           // TODO - refactor so that the name of the elasticsearch instances
           // and this reference are in sync
 
           name: 'elastic',
-        }
-      }  
+        },
+      },
     },
     AcmeClusterIssuer(name, email, server): $._Object(
       'cert-manager.io/v1', 'ClusterIssuer', name
@@ -69,11 +70,11 @@
           privateKeySecretRef: {
             name: name + '-clusterissuer-account-key',
           },
-          solvers: [{http01: {ingress: {class: 'nginx'}}}],
-        }
-      }
-    }
-  }, // crds
+          solvers: [{ http01: { ingress: { class: 'nginx' } } }],
+        },
+      },
+    },
+  },  // crds
 
   mixins: {
 
@@ -84,7 +85,7 @@
           spec+: {
             initContainers+: [{
               name: 'install-gcs-plugin',
-              command: ['sh', '-c', 'bin/elasticsearch-plugin install --batch repository-gcs'], 
+              command: ['sh', '-c', 'bin/elasticsearch-plugin install --batch repository-gcs'],
             }],
           },
         },
@@ -96,15 +97,15 @@
           for n in super.nodeSets
         ],
       },
-    }, // GcsPlugin
- 
+    },  // GcsPlugin
+
     TlsIngress: {
       local s = self,
       metadata+: {
         annotations+: {
-          "kubernetes.io/ingress.class": "nginx",
-          "cert-manager.io/cluster-issuer": "letsencrypt-prod",
-          "cert-manager.io/acme-challenge-type": "http01",
+          'kubernetes.io/ingress.class': 'nginx',
+          'cert-manager.io/cluster-issuer': 'letsencrypt-prod',
+          'cert-manager.io/acme-challenge-type': 'http01',
         },
       },
       spec+: {
@@ -117,14 +118,14 @@
       },
     },
 
-    AuthedIngress: self.TlsIngress + {
+    AuthedIngress: self.TlsIngress {
       local s = self,
       auth_endpoint:: 'https://$host/oauth2/',
       metadata+: {
         annotations+: {
           'nginx.ingress.kubernetes.io/auth-signin': '%sstart?rd=$escaped_request_uri' % s.auth_endpoint,
           'nginx.ingress.kubernetes.io/auth-url': 'http://k8s-sso.default.svc.cluster.local:8080/oauth2/auth',
-          "nginx.ingress.kubernetes.io/auth-response-headers": "X-Auth-ID",
+          'nginx.ingress.kubernetes.io/auth-response-headers': 'X-Auth-ID',
         },
       },
     },
@@ -132,7 +133,7 @@
   },
 
   funcs: {
-    AuthIngressFor(ing):: 
+    AuthIngressFor(ing)::
       $.Ingress(ing.metadata.name + '-oauth2') {
         spec+: {
           rules+: [{

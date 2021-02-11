@@ -1,9 +1,14 @@
 {
   local k = $.globals.k,
   local name = 'livefpl',
+  local fs_ns_mixin = {
+    metadata+: {
+      namespace: 'flus-system',
+    },
+  },
   // NB - currently this secret is manually provisioned
   local regsecret = { name: 'ghcrcred' },
-  image_repository: k.crds.ImageRepository(name) + {
+  image_repository: k.crds.ImageRepository(name) + fs_ns_mixin + {
     spec: {
       image: 'ghcr.io/paulrudin/%s' % name,
       interval: '1m0s',
@@ -11,7 +16,7 @@
     },
   },
 
-  image_policy: k.crds.ImagePolicy(name) + {
+  image_policy: k.crds.ImagePolicy(name) + fs_ns_mixin + {
     spec+: {
       policy: {
         semver: {
