@@ -15,7 +15,7 @@
     spec+: {
       policy: {
         semver: {
-          range: '>=v0.0.1-1',
+          range: '^0.x-0',
         },
       },
     },
