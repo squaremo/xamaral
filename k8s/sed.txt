@@ -1,1 +1,1 @@
-s/\(livefpl\:[^[:space:]]*\)$/\1 # {"$imagepolicy": "flux-system:livefpl"}/g
+s/\(livefpl\:[^[:space:]]*\)$/\1 # {"$imagepolicy": "livefpl"}/g
