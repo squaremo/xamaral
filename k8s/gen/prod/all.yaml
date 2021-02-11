@@ -1,1564 +1,4 @@
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-  namespace: kubeprod
-spec:
-  minReadySeconds: 30
-  replicas: 2
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      name: nginx-ingress-controller
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: "10254"
-        prometheus.io/scrape: "true"
-      labels:
-        name: nginx-ingress-controller
-    spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  name: nginx-ingress-controller
-              topologyKey: kubernetes.io/hostname
-            weight: 70
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  name: nginx-ingress-controller
-              topologyKey: failure-domain.beta.kubernetes.io/zone
-            weight: 70
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  name: nginx-ingress-controller
-              topologyKey: failure-domain.beta.kubernetes.io/region
-            weight: 70
-      containers:
-      - args:
-        - --configmap=kubeprod/nginx-ingress-0ff949c
-        - --ingress-class=nginx
-        - --publish-service=kubeprod/nginx-ingress
-        - --tcp-services-configmap=kubeprod/tcp-services-67c1890
-        - --udp-services-configmap=kubeprod/udp-services-67c1890
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        image: bitnami/nginx-ingress-controller:0.35.0-debian-10-r10
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        name: nginx
-        ports:
-        - containerPort: 80
-          name: http
-        - containerPort: 443
-          name: https
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        resources:
-          requests:
-            cpu: 100m
-        securityContext:
-          capabilities:
-            add:
-            - NET_BIND_SERVICE
-            drop:
-            - ALL
-          runAsUser: 1001
-        stdin: false
-        tty: false
-        volumeMounts: []
-      imagePullSecrets: []
-      initContainers: []
-      serviceAccountName: nginx-ingress-controller
-      terminationGracePeriodSeconds: 60
-      volumes: []
----
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-  namespace: kubeprod
-spec:
-  maxReplicas: 10
-  minReplicas: 2
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: nginx-ingress-controller
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-  namespace: kubeprod
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - endpoints
-  - pods
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - get
-  - list
-  - update
-  - watch
-- apiGroups:
-  - extensions
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
-- apiGroups:
-  - ""
-  resources:
-  - endpoints
-  verbs:
-  - create
-  - get
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
-- apiGroups:
-  - extensions
-  - networking.k8s.io
-  resources:
-  - ingresses/status
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resourceNames:
-  - ingress-controller-leader-nginx
-  resources:
-  - configmaps
-  verbs:
-  - get
-  - update
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-  namespace: kubeprod
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: nginx-ingress-controller
-subjects:
-- kind: ServiceAccount
-  name: nginx-ingress-controller
-  namespace: kubeprod
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress
-  name: nginx-ingress
-  namespace: kubeprod
-spec:
-  externalTrafficPolicy: Local
-  ports:
-  - name: http
-    port: 80
-    protocol: TCP
-  - name: https
-    port: 443
-    protocol: TCP
-  selector:
-    name: nginx-ingress-controller
-  type: LoadBalancer
----
-apiVersion: v1
-data: {}
-kind: ConfigMap
-metadata:
-  annotations: {}
-  labels:
-    name: udp-services
-  name: udp-services-67c1890
-  namespace: kubeprod
----
-apiVersion: v1
-data:
-  disable-ipv6: "false"
-  enable-vts-status: "true"
-  hsts: "true"
-  http2-max-field-size: 16k
-  http2-max-header-size: 64k
-  large-client-header-buffers: 8 32k
-  no-auth-locations: /.well-known/acme-challenge,/oauth2
-  proxy-buffer-size: 32k
-  proxy-connect-timeout: "15"
-kind: ConfigMap
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress
-  name: nginx-ingress-0ff949c
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - endpoints
-  - nodes
-  - pods
-  - secrets
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - get
-  - list
-  - update
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses/status
-  verbs:
-  - update
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses/status
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: nginx-ingress-controller
-subjects:
-- kind: ServiceAccount
-  name: nginx-ingress-controller
-  namespace: kubeprod
----
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-  namespace: kubeprod
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      name: nginx-ingress-controller
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations: {}
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-  namespace: kubeprod
----
-apiVersion: v1
-data: {}
-kind: ConfigMap
-metadata:
-  annotations: {}
-  labels:
-    name: tcp-services
-  name: tcp-services-67c1890
-  namespace: kubeprod
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations: {}
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy
-  namespace: kubeprod
-spec:
-  minReadySeconds: 30
-  replicas: 2
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      name: oauth2-proxy
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations: {}
-      labels:
-        name: oauth2-proxy
-    spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  name: oauth2-proxy
-              topologyKey: kubernetes.io/hostname
-            weight: 70
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  name: oauth2-proxy
-              topologyKey: failure-domain.beta.kubernetes.io/zone
-            weight: 70
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  name: oauth2-proxy
-              topologyKey: failure-domain.beta.kubernetes.io/region
-            weight: 70
-      containers:
-      - args:
-        - --cookie-domain=xamaral.com
-        - --cookie-refresh=3h
-        - --cookie-secure=true
-        - --email-domain=*
-        - --http-address=0.0.0.0:4180
-        - --provider=azure
-        - --redirect-url=https://auth.xamaral.com/oauth2/callback
-        - --set-xauthrequest=true
-        - --tls-cert-file=
-        - --upstream=file:///dev/null
-        env:
-        - name: OAUTH2_PROXY_AZURE_TENANT
-          valueFrom:
-            secretKeyRef:
-              key: azure_tenant
-              name: oauth2-proxy-7de4061
-        - name: OAUTH2_PROXY_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              key: client_id
-              name: oauth2-proxy-7de4061
-        - name: OAUTH2_PROXY_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              key: client_secret
-              name: oauth2-proxy-7de4061
-        - name: OAUTH2_PROXY_COOKIE_SECRET
-          valueFrom:
-            secretKeyRef:
-              key: cookie_secret
-              name: oauth2-proxy-7de4061
-        image: bitnami/oauth2-proxy:6.0.0-debian-10-r7
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /ping
-            port: http
-          initialDelaySeconds: 30
-        name: oauth2-proxy
-        ports:
-        - containerPort: 4180
-          name: http
-        readinessProbe:
-          httpGet:
-            path: /ping
-            port: http
-        resources:
-          requests:
-            cpu: 10m
-        stdin: false
-        tty: false
-        volumeMounts: []
-      imagePullSecrets: []
-      initContainers: []
-      terminationGracePeriodSeconds: 30
-      volumes: []
----
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  annotations: {}
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy
-  namespace: kubeprod
-spec:
-  maxReplicas: 10
-  minReplicas: 2
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: oauth2-proxy
----
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      location "~^/(?<target_host>[^/]+\.xamaral\.com)(?<remaining_uri>.*)$" {
-        rewrite ^ $scheme://$target_host$remaining_uri;
-      }
-  labels:
-    name: oauth2-ingress
-  name: oauth2-ingress
-  namespace: kubeprod
-spec:
-  rules:
-  - host: auth.xamaral.com
-    http:
-      paths:
-      - backend:
-          serviceName: oauth2-proxy
-          servicePort: 4180
-        path: /oauth2/
-      - backend:
-          serviceName: oauth2-proxy
-          servicePort: 4180
-        path: /
-  tls:
-  - hosts:
-    - auth.xamaral.com
-    secretName: oauth2-ingress-tls
----
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
-metadata:
-  annotations: {}
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy
-  namespace: kubeprod
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      name: oauth2-proxy
----
-apiVersion: v1
-data:
-  authz_domain: Kg==
-  azure_tenant: Yzk3YTQyOTktM2VlNC00ZWFiLThhYjMtNGJjYTdjNmZjNDRk
-  client_id: NDdjZTJiYmYtMTE3Ni00ODBiLWFlMDAtNjI0MWY1NzFlZTc0
-  client_secret: V1dMSytNNzdwcDFHbE1PQVZBTzNpNG83
-  cookie_secret: bG9xYzlXRFJYQitKeVFTT1RrNHl0QWZsV2Y1cnhPSlM=
-kind: Secret
-metadata:
-  annotations: {}
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy-7de4061
-  namespace: kubeprod
-type: Opaque
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations: {}
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy
-  namespace: kubeprod
-spec:
-  ports:
-  - name: http
-    port: 4180
-    targetPort: 4180
-  selector:
-    name: oauth2-proxy
-  type: ClusterIP
----
-apiVersion: v1
-data:
-  config.yml: |
-    global:
-      resolve_timeout: 5m
-    inhibit_rules:
-    - equal:
-      - alertname
-      - cluster
-      - service
-      source_match:
-        severity: critical
-      target_match:
-        severity: warning
-    receivers:
-    - name: email
-    route:
-      group_by:
-      - alertname
-      - cluster
-      - service
-      group_interval: 5m
-      group_wait: 30s
-      receiver: email
-      repeat_interval: 7d
-      routes: []
-kind: ConfigMap
-metadata:
-  annotations: {}
-  labels:
-    name: alertmanager
-  name: alertmanager
-  namespace: kubeprod
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  annotations: {}
-  labels:
-    name: alertmanager
-  name: alertmanager
-  namespace: kubeprod
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: alertmanager
-  serviceName: alertmanager
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /alertmanager/metrics
-        prometheus.io/port: "9093"
-        prometheus.io/scrape: "true"
-      labels:
-        name: alertmanager
-    spec:
-      containers:
-      - args:
-        - --config.file=/opt/bitnami/alertmanager/conf/config.yml
-        - --storage.path=/opt/bitnami/alertmanager/data
-        - --web.external-url=http://prometheus.xamaral.com/alertmanager
-        env: []
-        image: bitnami/alertmanager:0.21.0-debian-10-r4
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 10
-          httpGet:
-            path: /alertmanager/-/healthy
-            port: 9093
-          initialDelaySeconds: 60
-        name: alertmanager
-        ports:
-        - containerPort: 9093
-          name: alertmanager
-        readinessProbe:
-          failureThreshold: 10
-          httpGet:
-            path: /alertmanager/-/healthy
-            port: 9093
-          initialDelaySeconds: 3
-          periodSeconds: 3
-          timeoutSeconds: 3
-        stdin: false
-        tty: false
-        volumeMounts:
-        - mountPath: /opt/bitnami/alertmanager/conf
-          name: config
-          readOnly: true
-        - mountPath: /opt/bitnami/alertmanager/data
-          name: storage
-      - args:
-        - --volume-dir=/config
-        - --webhook-method=POST
-        - --webhook-url=http://localhost:9093/alertmanager/-/reload
-        env: []
-        image: bitnami/configmap-reload:0.4.0-debian-10-r1
-        imagePullPolicy: IfNotPresent
-        name: configmap-reload
-        ports: []
-        stdin: false
-        tty: false
-        volumeMounts:
-        - mountPath: /config
-          name: config
-          readOnly: true
-      imagePullSecrets: []
-      initContainers: []
-      securityContext:
-        fsGroup: 1001
-        runAsUser: 1001
-      terminationGracePeriodSeconds: 30
-      volumes:
-      - configMap:
-          name: alertmanager
-        name: config
-  updateStrategy:
-    rollingUpdate:
-      partition: 0
-    type: RollingUpdate
-  volumeClaimTemplates:
-  - metadata:
-      labels:
-        name: storage
-      name: storage
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 5Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations: {}
-  labels:
-    name: alertmanager
-  name: alertmanager
-  namespace: kubeprod
-spec:
-  ports:
-  - name: alertmanager
-    port: 9093
-    targetPort: 9093
-  selector:
-    name: alertmanager
-  type: ClusterIP
----
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User, X-Auth-Request-Email
-    nginx.ingress.kubernetes.io/auth-signin: https://auth.xamaral.com/oauth2/start?rd=%2F$server_name$escaped_request_uri
-    nginx.ingress.kubernetes.io/auth-url: https://auth.xamaral.com/oauth2/auth
-  labels:
-    name: prometheus
-  name: prometheus
-  namespace: kubeprod
-spec:
-  rules:
-  - host: prometheus.xamaral.com
-    http:
-      paths:
-      - backend:
-          serviceName: prometheus
-          servicePort: 9090
-        path: /
-      - backend:
-          serviceName: alertmanager
-          servicePort: 9093
-        path: /alertmanager
-  tls:
-  - hosts:
-    - prometheus.xamaral.com
-    secretName: prometheus-tls
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: kube-state-metrics
-  name: kube-state-metrics
-  namespace: kubeprod
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: kube-state-metrics-resizer
-subjects:
-- kind: ServiceAccount
-  name: kube-state-metrics
-  namespace: kubeprod
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations: {}
-  labels:
-    name: kube-state-metrics
-  name: kube-state-metrics
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: kube-state-metrics
-  name: kube-state-metrics
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - endpoints
-  - limitranges
-  - namespaces
-  - nodes
-  - persistentvolumeclaims
-  - persistentvolumes
-  - pods
-  - replicationcontrollers
-  - resourcequotas
-  - secrets
-  - services
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  - validatingwebhookconfigurations
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - daemonsets
-  - deployments
-  - replicasets
-  - statefulsets
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - autoscaling
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - autoscaling.k8s.io
-  resources:
-  - verticalpodautoscalers
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - batch
-  resources:
-  - cronjobs
-  - jobs
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - certificates.k8s.io
-  resources:
-  - certificatesigningrequests
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - daemonsets
-  - deployments
-  - ingresses
-  - replicasets
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
-  - networkpolicies
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - storage.k8s.io
-  resources:
-  - storageclasses
-  - volumeattachments
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - storageclasses.k8s.io
-  resources:
-  - storageclasses
-  verbs:
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: kube-state-metrics
-  name: kube-state-metrics
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: kube-state-metrics
-subjects:
-- kind: ServiceAccount
-  name: kube-state-metrics
-  namespace: kubeprod
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations: {}
-  labels:
-    name: kube-state-metrics
-  name: kube-state-metrics
-  namespace: kubeprod
-spec:
-  minReadySeconds: 30
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      name: kube-state-metrics
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        prometheus.io/port: "8080"
-        prometheus.io/scrape: "true"
-      labels:
-        name: kube-state-metrics
-    spec:
-      containers:
-      - args:
-        - --collectors=certificatesigningrequests,configmaps,cronjobs,daemonsets,deployments,endpoints,horizontalpodautoscalers,ingresses,jobs,limitranges,mutatingwebhookconfigurations,namespaces,networkpolicies,nodes,persistentvolumeclaims,persistentvolumes,poddisruptionbudgets,pods,replicasets,replicationcontrollers,resourcequotas,secrets,services,statefulsets,storageclasses,validatingwebhookconfigurations,volumeattachments
-        env: []
-        image: bitnami/kube-state-metrics:1.9.7-debian-10-r18
-        imagePullPolicy: IfNotPresent
-        name: ksm
-        ports:
-        - containerPort: 8080
-          name: metrics
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          timeoutSeconds: 5
-        stdin: false
-        tty: false
-        volumeMounts: []
-      - args:
-        - --container=ksm
-        - --cpu=100m
-        - --deployment=kube-state-metrics
-        - --extra-cpu=1m
-        - --extra-memory=2Mi
-        - --memory=100Mi
-        - --threshold=5
-        command:
-        - /pod_nanny
-        env:
-        - name: MY_POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: MY_POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        image: k8s.gcr.io/addon-resizer:1.8.7
-        imagePullPolicy: IfNotPresent
-        name: addon-resizer
-        ports: []
-        resources:
-          limits:
-            cpu: 100m
-            memory: 30Mi
-          requests:
-            cpu: 100m
-            memory: 30Mi
-        stdin: false
-        tty: false
-        volumeMounts: []
-      imagePullSecrets: []
-      initContainers: []
-      serviceAccountName: kube-state-metrics
-      terminationGracePeriodSeconds: 30
-      volumes: []
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  annotations: {}
-  labels:
-    name: kube-state-metrics-resizer
-  name: kube-state-metrics-resizer
-  namespace: kubeprod
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-- apiGroups:
-  - extensions
-  resourceNames:
-  - kube-state-metrics
-  resources:
-  - deployments
-  verbs:
-  - get
-  - update
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  annotations: {}
-  labels:
-    name: node-exporter
-  name: node-exporter
-  namespace: kubeprod
-spec:
-  selector:
-    matchLabels:
-      name: node-exporter
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: "9100"
-        prometheus.io/scrape: "true"
-      labels:
-        name: node-exporter
-    spec:
-      containers:
-      - args:
-        - --collector.filesystem.ignored-fs-types=^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs)?$
-        - --collector.filesystem.ignored-mount-points=^(/rootfs|/host)?/(sys|proc|dev|host|etc)($|/)
-        - --path.procfs=/host/proc
-        - --path.sysfs=/host/sys
-        env: []
-        image: bitnami/node-exporter:1.0.1-debian-10-r4
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /
-            port: scrape
-        name: node-exporter
-        ports:
-        - containerPort: 9100
-          name: scrape
-        readinessProbe:
-          httpGet:
-            path: /
-            port: scrape
-          successThreshold: 2
-        stdin: false
-        tty: false
-        volumeMounts:
-        - mountPath: /host/proc
-          name: procfs
-          readOnly: true
-        - mountPath: /rootfs
-          name: root
-          readOnly: true
-        - mountPath: /host/sys
-          name: sysfs
-          readOnly: true
-      hostNetwork: true
-      hostPID: true
-      imagePullSecrets: []
-      initContainers: []
-      terminationGracePeriodSeconds: 30
-      tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-      volumes:
-      - hostPath:
-          path: /proc
-          type: ""
-        name: procfs
-      - hostPath:
-          path: /
-          type: ""
-        name: root
-      - hostPath:
-          path: /sys
-          type: ""
-        name: sysfs
-  updateStrategy:
-    rollingUpdate:
-      maxUnavailable: 1
-    type: RollingUpdate
----
-apiVersion: v1
-data:
-  basic.yaml: |
-    groups:
-    - name: basic.rules
-      rules:
-      - alert: CrashLooping
-        annotations:
-          message: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container
-            }}) is restarting {{ $value }} times / 5 minutes.
-        expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 0
-        for: 1h
-        labels:
-          severity: critical
-      - alert: K8sApiUnavailable
-        annotations:
-          message: Kubernetes API has disappeared from Prometheus target discovery
-        expr: absent(up{job="kubernetes-apiservers"} == 1)
-        for: 15m
-        labels:
-          severity: critical
-  monitoring.yml: |
-    groups:
-    - name: monitoring.rules
-      rules:
-      - alert: AlertmanagerBadConfig
-        annotations:
-          message: Reloading Alertmanager's configuration has failed for {{ $labels.namespace
-            }}/{{ $labels.pod }}.
-        expr: alertmanager_config_last_reload_successful{kubernetes_namespace="kubeprod"}
-          == 0
-        for: 10m
-        labels:
-          severity: warning
-      - alert: PrometheusBadConfig
-        annotations:
-          message: Prometheus {{ $labels.namespace }}/{{ $labels.pod }} has failed to
-            reload its configuration.
-        expr: max_over_time(prometheus_config_last_reload_successful{kubernetes_namespace="kubeprod"}[5m])
-          == 0
-        for: 10m
-        labels:
-          severity: critical
-  prometheus.yml: |
-    alerting:
-      alertmanagers:
-      - kubernetes_sd_configs:
-        - role: endpoints
-        path_prefix: /alertmanager
-        relabel_configs:
-        - action: keep
-          regex: kubeprod;alertmanager;alertmanager
-          source_labels:
-          - __meta_kubernetes_namespace
-          - __meta_kubernetes_service_name
-          - __meta_kubernetes_endpoint_port_name
-    global:
-      evaluation_interval: 60s
-      scrape_interval: 60s
-    rule_files:
-    - basic.yaml
-    - monitoring.yml
-    scrape_configs:
-    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-      job_name: kubernetes-apiservers
-      relabel_configs: []
-      scheme: https
-      static_configs:
-      - targets:
-        - kubernetes.default.svc:443
-      tls_config:
-        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-      job_name: kubernetes-cadvisor
-      kubernetes_sd_configs:
-      - role: node
-      relabel_configs:
-      - action: labelmap
-        regex: __meta_kubernetes_node_label_(.+)
-      - replacement: kubernetes.default.svc:443
-        target_label: __address__
-      - regex: (.+)
-        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
-        source_labels:
-        - __meta_kubernetes_node_name
-        target_label: __metrics_path__
-      scheme: https
-      tls_config:
-        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    - job_name: kubernetes-ingresses
-      kubernetes_sd_configs:
-      - role: ingress
-      metrics_path: /probe
-      params:
-        module:
-        - http_2xx
-      relabel_configs:
-      - action: keep
-        regex: true
-        source_labels:
-        - __meta_kubernetes_ingress_annotation_prometheus_io_probe
-      - regex: (.+);(.+);(.+)
-        replacement: ${1}://${2}${3}
-        source_labels:
-        - __meta_kubernetes_ingress_scheme
-        - __address__
-        - __meta_kubernetes_ingress_path
-        target_label: __param_target
-      - replacement: blackbox-exporter:9115
-        target_label: __address__
-      - source_labels:
-        - __param_target
-        target_label: instance
-      - action: labelmap
-        regex: __meta_kubernetes_ingress_label_(.+)
-      - source_labels:
-        - __meta_kubernetes_namespace
-        target_label: kubernetes_namespace
-      - source_labels:
-        - __meta_kubernetes_ingress_name
-        target_label: kubernetes_name
-    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-      job_name: kubernetes-nodes
-      kubernetes_sd_configs:
-      - role: node
-      relabel_configs:
-      - action: labelmap
-        regex: __meta_kubernetes_node_label_(.+)
-      - replacement: kubernetes.default.svc:443
-        target_label: __address__
-      - regex: (.+)
-        replacement: /api/v1/nodes/${1}/proxy/metrics
-        source_labels:
-        - __meta_kubernetes_node_name
-        target_label: __metrics_path__
-      scheme: https
-      tls_config:
-        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    - job_name: kubernetes-pods
-      kubernetes_sd_configs:
-      - role: pod
-      relabel_configs:
-      - action: keep
-        regex: true
-        source_labels:
-        - __meta_kubernetes_pod_annotation_prometheus_io_scrape
-      - action: replace
-        regex: (.+)
-        source_labels:
-        - __meta_kubernetes_pod_annotation_prometheus_io_path
-        target_label: __metrics_path__
-      - action: replace
-        regex: ([^:]+)(?::\d+)?;(\d+)
-        replacement: $1:$2
-        source_labels:
-        - __address__
-        - __meta_kubernetes_pod_annotation_prometheus_io_port
-        target_label: __address__
-      - action: labelmap
-        regex: __meta_kubernetes_pod_label_(.+)
-      - action: replace
-        source_labels:
-        - __meta_kubernetes_namespace
-        target_label: kubernetes_namespace
-      - action: replace
-        source_labels:
-        - __meta_kubernetes_pod_name
-        target_label: kubernetes_pod_name
-    - job_name: prometheus
-      static_configs:
-      - targets:
-        - localhost:9090
-    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-      job_name: kubernetes-service-endpoints
-      kubernetes_sd_configs:
-      - role: endpoints
-      relabel_configs:
-      - action: keep
-        regex: true
-        source_labels:
-        - __meta_kubernetes_service_annotation_prometheus_io_scrape
-      - action: replace
-        regex: (https?)
-        source_labels:
-        - __meta_kubernetes_service_annotation_prometheus_io_scheme
-        target_label: __scheme__
-      - action: replace
-        regex: (.+)
-        source_labels:
-        - __meta_kubernetes_service_annotation_prometheus_io_path
-        target_label: __metrics_path__
-      - action: replace
-        regex: ([^:]+)(?::\d+)?;(\d+)
-        replacement: $1:$2
-        source_labels:
-        - __address__
-        - __meta_kubernetes_service_annotation_prometheus_io_port
-        target_label: __address__
-      - action: labelmap
-        regex: __meta_kubernetes_service_label_(.+)
-      - action: replace
-        source_labels:
-        - __meta_kubernetes_namespace
-        target_label: kubernetes_namespace
-      - action: replace
-        source_labels:
-        - __meta_kubernetes_service_name
-        target_label: kubernetes_name
-      scheme: http
-      tls_config:
-        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    - job_name: kubernetes-services
-      kubernetes_sd_configs:
-      - role: service
-      metrics_path: /probe
-      params:
-        module:
-        - http_2xx
-      relabel_configs:
-      - action: keep
-        regex: true
-        source_labels:
-        - __meta_kubernetes_service_annotation_prometheus_io_probe
-      - source_labels:
-        - __address__
-        target_label: __param_target
-      - replacement: blackbox-exporter:9115
-        target_label: __address__
-      - source_labels:
-        - __param_target
-        target_label: instance
-      - action: labelmap
-        regex: __meta_kubernetes_service_label_(.+)
-      - source_labels:
-        - __meta_kubernetes_namespace
-        target_label: kubernetes_namespace
-      - source_labels:
-        - __meta_kubernetes_service_name
-        target_label: kubernetes_name
-kind: ConfigMap
-metadata:
-  annotations: {}
-  labels:
-    name: prometheus
-  name: prometheus
-  namespace: kubeprod
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  annotations: {}
-  labels:
-    name: prometheus
-  name: prometheus
-  namespace: kubeprod
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: prometheus
-  serviceName: prometheus
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: "9090"
-        prometheus.io/scrape: "true"
-      labels:
-        name: prometheus
-    spec:
-      containers:
-      - args:
-        - --config.file=/opt/bitnami/prometheus/conf/custom/prometheus.yml
-        - --storage.tsdb.retention.time=183d
-        - --web.console.libraries=/opt/bitnami/prometheus/conf/console_libraries
-        - --web.console.templates=/opt/bitnami/prometheus/conf/consoles
-        - --web.external-url=http://prometheus.xamaral.com/
-        - --web.enable-lifecycle
-        env: []
-        image: bitnami/prometheus:2.22.1-debian-10-r7
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /
-            port: web
-          initialDelaySeconds: 1200
-          successThreshold: 1
-        name: prometheus
-        ports:
-        - containerPort: 9090
-          name: web
-        readinessProbe:
-          httpGet:
-            path: /
-            port: web
-          initialDelaySeconds: 5
-          successThreshold: 2
-        resources:
-          requests:
-            cpu: 500m
-            memory: 500Mi
-        securityContext:
-          runAsUser: 1001
-        stdin: false
-        tty: false
-        volumeMounts:
-        - mountPath: /opt/bitnami/prometheus/conf/custom
-          name: config
-          readOnly: true
-        - mountPath: /opt/bitnami/prometheus/data
-          name: data
-      - args:
-        - --volume-dir=/config
-        - --webhook-method=POST
-        - --webhook-url=http://localhost:9090/-/reload
-        env: []
-        image: bitnami/configmap-reload:0.4.0-debian-10-r1
-        imagePullPolicy: IfNotPresent
-        name: configmap-reload
-        ports: []
-        stdin: false
-        tty: false
-        volumeMounts:
-        - mountPath: /config
-          name: config
-          readOnly: true
-      imagePullSecrets: []
-      initContainers: []
-      securityContext:
-        fsGroup: 1001
-      serviceAccountName: prometheus
-      terminationGracePeriodSeconds: 300
-      volumes:
-      - configMap:
-          name: prometheus
-        name: config
-  updateStrategy:
-    rollingUpdate:
-      partition: 0
-    type: RollingUpdate
-  volumeClaimTemplates:
-  - metadata:
-      labels:
-        name: data
-      name: data
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 7905Mi
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: prometheus
-  name: prometheus
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: prometheus
-subjects:
-- kind: ServiceAccount
-  name: prometheus
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: prometheus
-  name: prometheus
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  - nodes/proxy
-  - nodes/metrics
-  - services
-  - endpoints
-  - pods
-  - ingresses
-  - configmaps
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses
-  - ingresses/status
-  verbs:
-  - get
-  - list
-  - watch
-- nonResourceURLs:
-  - /metrics
-  verbs:
-  - get
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations: {}
-  labels:
-    name: prometheus
-  name: prometheus
-  namespace: kubeprod
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations: {}
-  labels:
-    name: prometheus
-  name: prometheus
-  namespace: kubeprod
-spec:
-  ports:
-  - name: web
-    port: 9090
-    targetPort: 9090
-  selector:
-    name: prometheus
-  type: ClusterIP
----
 apiVersion: v1
 data:
   release: dev-untagged
@@ -1612,92 +52,51 @@ kind: ClusterRole
 metadata:
   annotations: {}
   labels:
-    name: cert-manager-clusterissuers
-  name: cert-manager-clusterissuers
+    name: cert-manager-view
+  name: cert-manager-view
 rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - clusterissuers
-  - clusterissuers/status
-  verbs:
-  - update
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - clusterissuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-ingress-shim
-  name: cert-manager-ingress-shim
-rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  verbs:
-  - create
-  - update
-  - delete
 - apiGroups:
   - cert-manager.io
   resources:
   - certificates
   - certificaterequests
   - issuers
-  - clusterissuers
   verbs:
   - get
   - list
   - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-certificates
+  name: cert-manager-certificates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-certificates
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-clusterissuers
+  name: cert-manager-clusterissuers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-clusterissuers
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
@@ -1740,306 +139,6 @@ rules:
   verbs:
   - create
   - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-leaderelection
-  name: cert-manager:leaderelection
-  namespace: kubeprod
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - get
-  - create
-  - update
-  - patch
----
-apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
-metadata:
-  annotations: {}
-  labels:
-    name: letsencrypt-staging
-  name: letsencrypt-staging
-spec:
-  acme:
-    email: paul@rudin.co.uk
-    privateKeySecretRef:
-      name: letsencrypt-staging
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    solvers:
-    - http01:
-        ingress:
-          class: nginx
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-view
-  name: cert-manager-view
-rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  - issuers
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-certificates
-  name: cert-manager-certificates
-rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificates/status
-  - certificaterequests
-  - certificaterequests/status
-  verbs:
-  - update
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  - clusterissuers
-  - issuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates/finalizers
-  - certificaterequests/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - orders
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-challenges
-  name: cert-manager-challenges
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-challenges
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-challenges
-  name: cert-manager-challenges
-rules:
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - challenges
-  - challenges/status
-  verbs:
-  - update
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - challenges
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - issuers
-  - clusterissuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-  - update
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - challenges/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager
-  name: cert-manager
-  namespace: kubeprod
-spec:
-  minReadySeconds: 30
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      name: cert-manager
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: "9402"
-        prometheus.io/scrape: "true"
-      labels:
-        name: cert-manager
-    spec:
-      containers:
-      - args:
-        - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v0.15.2
-        - --cluster-resource-namespace=$(POD_NAMESPACE)
-        - --default-issuer-kind=ClusterIssuer
-        - --default-issuer-name=letsencrypt-prod
-        - --leader-election-namespace=$(POD_NAMESPACE)
-        - --v=2
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        image: bitnami/cert-manager:0.16.1-debian-10-r3
-        imagePullPolicy: IfNotPresent
-        name: cert-manager
-        ports:
-        - containerPort: 9402
-          name: prometheus
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-        stdin: false
-        tty: false
-        volumeMounts: []
-      imagePullSecrets: []
-      initContainers: []
-      serviceAccountName: cert-manager
-      terminationGracePeriodSeconds: 30
-      volumes: []
----
-apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
-metadata:
-  annotations: {}
-  labels:
-    name: letsencrypt-prod
-  name: letsencrypt-prod
-spec:
-  acme:
-    email: paul@rudin.co.uk
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    server: https://acme-v02.api.letsencrypt.org/directory
-    solvers:
-    - http01:
-        ingress:
-          class: nginx
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
@@ -2102,6 +201,47 @@ rules:
   verbs:
   - create
   - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-issuers
+  name: cert-manager-issuers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-issuers
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-orders
+  name: cert-manager-orders
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-orders
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager
+  name: cert-manager
+  namespace: kubeprod
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -7522,94 +5662,46 @@ spec:
     storage: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-certificates
-  name: cert-manager-certificates
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-certificates
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-leaderelection
-  name: cert-manager:leaderelection
-  namespace: kubeprod
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: cert-manager:leaderelection
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+kind: ClusterRole
 metadata:
   annotations: {}
   labels:
     name: cert-manager-clusterissuers
   name: cert-manager-clusterissuers
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-clusterissuers
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-ingress-shim
-  name: cert-manager-ingress-shim
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-ingress-shim
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager-orders
-  name: cert-manager-orders
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-orders
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations: {}
-  labels:
-    name: cert-manager
-  name: cert-manager
-  namespace: kubeprod
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - clusterissuers
+  - clusterissuers/status
+  verbs:
+  - update
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - clusterissuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
@@ -7637,15 +5729,379 @@ kind: ClusterRoleBinding
 metadata:
   annotations: {}
   labels:
-    name: cert-manager-issuers
-  name: cert-manager-issuers
+    name: cert-manager-ingress-shim
+  name: cert-manager-ingress-shim
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cert-manager-issuers
+  name: cert-manager-ingress-shim
 subjects:
 - kind: ServiceAccount
   name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  annotations: {}
+  labels:
+    name: letsencrypt-prod
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: paul@rudin.co.uk
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager
+  name: cert-manager
+  namespace: kubeprod
+spec:
+  minReadySeconds: 30
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: cert-manager
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9402"
+        prometheus.io/scrape: "true"
+      labels:
+        name: cert-manager
+    spec:
+      containers:
+      - args:
+        - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v0.15.2
+        - --cluster-resource-namespace=$(POD_NAMESPACE)
+        - --default-issuer-kind=ClusterIssuer
+        - --default-issuer-name=letsencrypt-prod
+        - --leader-election-namespace=$(POD_NAMESPACE)
+        - --v=2
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: bitnami/cert-manager:0.16.1-debian-10-r3
+        imagePullPolicy: IfNotPresent
+        name: cert-manager
+        ports:
+        - containerPort: 9402
+          name: prometheus
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        stdin: false
+        tty: false
+        volumeMounts: []
+      imagePullSecrets: []
+      initContainers: []
+      serviceAccountName: cert-manager
+      terminationGracePeriodSeconds: 30
+      volumes: []
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-ingress-shim
+  name: cert-manager-ingress-shim
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  verbs:
+  - create
+  - update
+  - delete
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  - issuers
+  - clusterissuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-leaderelection
+  name: cert-manager:leaderelection
+  namespace: kubeprod
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - create
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-leaderelection
+  name: cert-manager:leaderelection
+  namespace: kubeprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-manager:leaderelection
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-certificates
+  name: cert-manager-certificates
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificates/status
+  - certificaterequests
+  - certificaterequests/status
+  verbs:
+  - update
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  - clusterissuers
+  - issuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates/finalizers
+  - certificaterequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - orders
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-challenges
+  name: cert-manager-challenges
+rules:
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges
+  - challenges/status
+  verbs:
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - issuers
+  - clusterissuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-challenges
+  name: cert-manager-challenges
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-challenges
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  annotations: {}
+  labels:
+    name: letsencrypt-staging
+  name: letsencrypt-staging
+spec:
+  acme:
+    email: paul@rudin.co.uk
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: external-dns-viewer
+  name: external-dns-viewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-dns
+subjects:
+- kind: ServiceAccount
+  name: external-dns
   namespace: kubeprod
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -7853,42 +6309,6 @@ rules:
   - dnsendpoints/status
   verbs:
   - update
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: external-dns-viewer
-  name: external-dns-viewer
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: external-dns
-subjects:
-- kind: ServiceAccount
-  name: external-dns
-  namespace: kubeprod
----
-apiVersion: v1
-data:
-  dashboards_provider.yml: |
-    apiVersion: 1
-    providers:
-    - disableDeletion: false
-      editable: false
-      folder: Kubernetes
-      name: kubernetes
-      options:
-        path: /opt/bitnami/grafana/conf/provisioning/dashboards/kubernetes
-      type: file
-kind: ConfigMap
-metadata:
-  annotations: {}
-  labels:
-    name: grafana-dashboards-configuration
-  name: grafana-dashboards-configuration-b7cab55
-  namespace: kubeprod
 ---
 apiVersion: v1
 data:
@@ -12375,6 +10795,26 @@ spec:
   type: ClusterIP
 ---
 apiVersion: v1
+data:
+  dashboards_provider.yml: |
+    apiVersion: 1
+    providers:
+    - disableDeletion: false
+      editable: false
+      folder: Kubernetes
+      name: kubernetes
+      options:
+        path: /opt/bitnami/grafana/conf/provisioning/dashboards/kubernetes
+      type: file
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: grafana-dashboards-configuration
+  name: grafana-dashboards-configuration-b7cab55
+  namespace: kubeprod
+---
+apiVersion: v1
 kind: Namespace
 metadata:
   annotations: {}
@@ -12382,58 +10822,1565 @@ metadata:
     name: kubeprod
   name: kubeprod
 ---
-apiVersion: image.toolkit.fluxcd.io/v1alpha1
-kind: ImagePolicy
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
 metadata:
   annotations: {}
   labels:
-    name: livefpl
-  name: livefpl
-  namespace: flus-system
-spec:
-  imageRepositoryRef:
-    name: livefpl
-  policy:
-    semver:
-      range: 0.0.x
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+  namespace: kubeprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: nginx-ingress-controller
+  namespace: kubeprod
 ---
-apiVersion: image.toolkit.fluxcd.io/v1alpha1
-kind: ImageRepository
+apiVersion: v1
+kind: ServiceAccount
 metadata:
   annotations: {}
   labels:
-    name: livefpl
-  name: livefpl
-  namespace: flus-system
-spec:
-  image: ghcr.io/paulrudin/livefpl
-  interval: 1m0s
-  secretRef:
-    name: ghcrcred
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+  namespace: kubeprod
 ---
-apiVersion: extensions/v1beta1
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress
+  name: nginx-ingress
+  namespace: kubeprod
+spec:
+  externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    protocol: TCP
+  selector:
+    name: nginx-ingress-controller
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+  namespace: kubeprod
+spec:
+  minReadySeconds: 30
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: nginx-ingress-controller
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "10254"
+        prometheus.io/scrape: "true"
+      labels:
+        name: nginx-ingress-controller
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: nginx-ingress-controller
+              topologyKey: kubernetes.io/hostname
+            weight: 70
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: nginx-ingress-controller
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 70
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: nginx-ingress-controller
+              topologyKey: failure-domain.beta.kubernetes.io/region
+            weight: 70
+      containers:
+      - args:
+        - --configmap=kubeprod/nginx-ingress-0ff949c
+        - --ingress-class=nginx
+        - --publish-service=kubeprod/nginx-ingress
+        - --tcp-services-configmap=kubeprod/tcp-services-67c1890
+        - --udp-services-configmap=kubeprod/udp-services-67c1890
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: bitnami/nginx-ingress-controller:0.35.0-debian-10-r10
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: nginx
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+        securityContext:
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          runAsUser: 1001
+        stdin: false
+        tty: false
+        volumeMounts: []
+      imagePullSecrets: []
+      initContainers: []
+      serviceAccountName: nginx-ingress-controller
+      terminationGracePeriodSeconds: 60
+      volumes: []
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+  namespace: kubeprod
+spec:
+  maxReplicas: 10
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-ingress-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: nginx-ingress-controller
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+  namespace: kubeprod
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - pods
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - extensions
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - extensions
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resourceNames:
+  - ingress-controller-leader-nginx
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+  namespace: kubeprod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      name: nginx-ingress-controller
+---
+apiVersion: v1
+data: {}
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: tcp-services
+  name: tcp-services-67c1890
+  namespace: kubeprod
+---
+apiVersion: v1
+data: {}
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: udp-services
+  name: udp-services-67c1890
+  namespace: kubeprod
+---
+apiVersion: v1
+data:
+  disable-ipv6: "false"
+  enable-vts-status: "true"
+  hsts: "true"
+  http2-max-field-size: 16k
+  http2-max-header-size: 64k
+  large-client-header-buffers: 8 32k
+  no-auth-locations: /.well-known/acme-challenge,/oauth2
+  proxy-buffer-size: 32k
+  proxy-connect-timeout: "15"
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress
+  name: nginx-ingress-0ff949c
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    name: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubeprod
+spec:
+  minReadySeconds: 30
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: oauth2-proxy
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        name: oauth2-proxy
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: oauth2-proxy
+              topologyKey: kubernetes.io/hostname
+            weight: 70
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: oauth2-proxy
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 70
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: oauth2-proxy
+              topologyKey: failure-domain.beta.kubernetes.io/region
+            weight: 70
+      containers:
+      - args:
+        - --cookie-domain=xamaral.com
+        - --cookie-refresh=3h
+        - --cookie-secure=true
+        - --email-domain=*
+        - --http-address=0.0.0.0:4180
+        - --provider=azure
+        - --redirect-url=https://auth.xamaral.com/oauth2/callback
+        - --set-xauthrequest=true
+        - --tls-cert-file=
+        - --upstream=file:///dev/null
+        env:
+        - name: OAUTH2_PROXY_AZURE_TENANT
+          valueFrom:
+            secretKeyRef:
+              key: azure_tenant
+              name: oauth2-proxy-7de4061
+        - name: OAUTH2_PROXY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              key: client_id
+              name: oauth2-proxy-7de4061
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: client_secret
+              name: oauth2-proxy-7de4061
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: cookie_secret
+              name: oauth2-proxy-7de4061
+        image: bitnami/oauth2-proxy:6.0.0-debian-10-r7
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+          initialDelaySeconds: 30
+        name: oauth2-proxy
+        ports:
+        - containerPort: 4180
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        resources:
+          requests:
+            cpu: 10m
+        stdin: false
+        tty: false
+        volumeMounts: []
+      imagePullSecrets: []
+      initContainers: []
+      terminationGracePeriodSeconds: 30
+      volumes: []
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  annotations: {}
+  labels:
+    name: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubeprod
+spec:
+  maxReplicas: 10
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: oauth2-proxy
+---
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/acme-challenge-type: http01
-    cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location "~^/(?<target_host>[^/]+\.xamaral\.com)(?<remaining_uri>.*)$" {
+        rewrite ^ $scheme://$target_host$remaining_uri;
+      }
   labels:
-    name: livefpl
-  name: livefpl
+    name: oauth2-ingress
+  name: oauth2-ingress
+  namespace: kubeprod
 spec:
   rules:
-  - host: livefpl.xamaral.com
+  - host: auth.xamaral.com
     http:
       paths:
       - backend:
-          serviceName: livefpl
-          servicePort: 8000
+          serviceName: oauth2-proxy
+          servicePort: 4180
+        path: /oauth2/
+      - backend:
+          serviceName: oauth2-proxy
+          servicePort: 4180
         path: /
   tls:
   - hosts:
-    - livefpl.xamaral.com
-    secretName: livefpl-tls-secret
+    - auth.xamaral.com
+    secretName: oauth2-ingress-tls
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  annotations: {}
+  labels:
+    name: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubeprod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      name: oauth2-proxy
+---
+apiVersion: v1
+data:
+  authz_domain: Kg==
+  azure_tenant: Yzk3YTQyOTktM2VlNC00ZWFiLThhYjMtNGJjYTdjNmZjNDRk
+  client_id: NDdjZTJiYmYtMTE3Ni00ODBiLWFlMDAtNjI0MWY1NzFlZTc0
+  client_secret: V1dMSytNNzdwcDFHbE1PQVZBTzNpNG83
+  cookie_secret: bG9xYzlXRFJYQitKeVFTT1RrNHl0QWZsV2Y1cnhPSlM=
+kind: Secret
+metadata:
+  annotations: {}
+  labels:
+    name: oauth2-proxy
+  name: oauth2-proxy-7de4061
+  namespace: kubeprod
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubeprod
+spec:
+  ports:
+  - name: http
+    port: 4180
+    targetPort: 4180
+  selector:
+    name: oauth2-proxy
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User, X-Auth-Request-Email
+    nginx.ingress.kubernetes.io/auth-signin: https://auth.xamaral.com/oauth2/start?rd=%2F$server_name$escaped_request_uri
+    nginx.ingress.kubernetes.io/auth-url: https://auth.xamaral.com/oauth2/auth
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: kubeprod
+spec:
+  rules:
+  - host: prometheus.xamaral.com
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus
+          servicePort: 9090
+        path: /
+      - backend:
+          serviceName: alertmanager
+          servicePort: 9093
+        path: /alertmanager
+  tls:
+  - hosts:
+    - prometheus.xamaral.com
+    secretName: prometheus-tls
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics
+  name: kube-state-metrics
+  namespace: kubeprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kube-state-metrics-resizer
+subjects:
+- kind: ServiceAccount
+  name: kube-state-metrics
+  namespace: kubeprod
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics
+  name: kube-state-metrics
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics
+  name: kube-state-metrics
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - limitranges
+  - namespaces
+  - nodes
+  - persistentvolumeclaims
+  - persistentvolumes
+  - pods
+  - replicationcontrollers
+  - resourcequotas
+  - secrets
+  - services
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  - deployments
+  - replicasets
+  - statefulsets
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - autoscaling.k8s.io
+  resources:
+  - verticalpodautoscalers
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - cronjobs
+  - jobs
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - daemonsets
+  - deployments
+  - ingresses
+  - replicasets
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  - volumeattachments
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - storageclasses.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics
+  name: kube-state-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-state-metrics
+subjects:
+- kind: ServiceAccount
+  name: kube-state-metrics
+  namespace: kubeprod
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics
+  name: kube-state-metrics
+  namespace: kubeprod
+spec:
+  minReadySeconds: 30
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: kube-state-metrics
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: kube-state-metrics
+    spec:
+      containers:
+      - args:
+        - --collectors=certificatesigningrequests,configmaps,cronjobs,daemonsets,deployments,endpoints,horizontalpodautoscalers,ingresses,jobs,limitranges,mutatingwebhookconfigurations,namespaces,networkpolicies,nodes,persistentvolumeclaims,persistentvolumes,poddisruptionbudgets,pods,replicasets,replicationcontrollers,resourcequotas,secrets,services,statefulsets,storageclasses,validatingwebhookconfigurations,volumeattachments
+        env: []
+        image: bitnami/kube-state-metrics:1.9.7-debian-10-r18
+        imagePullPolicy: IfNotPresent
+        name: ksm
+        ports:
+        - containerPort: 8080
+          name: metrics
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        stdin: false
+        tty: false
+        volumeMounts: []
+      - args:
+        - --container=ksm
+        - --cpu=100m
+        - --deployment=kube-state-metrics
+        - --extra-cpu=1m
+        - --extra-memory=2Mi
+        - --memory=100Mi
+        - --threshold=5
+        command:
+        - /pod_nanny
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: k8s.gcr.io/addon-resizer:1.8.7
+        imagePullPolicy: IfNotPresent
+        name: addon-resizer
+        ports: []
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 30Mi
+        stdin: false
+        tty: false
+        volumeMounts: []
+      imagePullSecrets: []
+      initContainers: []
+      serviceAccountName: kube-state-metrics
+      terminationGracePeriodSeconds: 30
+      volumes: []
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics-resizer
+  name: kube-state-metrics-resizer
+  namespace: kubeprod
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - extensions
+  resourceNames:
+  - kube-state-metrics
+  resources:
+  - deployments
+  verbs:
+  - get
+  - update
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  annotations: {}
+  labels:
+    name: node-exporter
+  name: node-exporter
+  namespace: kubeprod
+spec:
+  selector:
+    matchLabels:
+      name: node-exporter
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9100"
+        prometheus.io/scrape: "true"
+      labels:
+        name: node-exporter
+    spec:
+      containers:
+      - args:
+        - --collector.filesystem.ignored-fs-types=^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs)?$
+        - --collector.filesystem.ignored-mount-points=^(/rootfs|/host)?/(sys|proc|dev|host|etc)($|/)
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        env: []
+        image: bitnami/node-exporter:1.0.1-debian-10-r4
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /
+            port: scrape
+        name: node-exporter
+        ports:
+        - containerPort: 9100
+          name: scrape
+        readinessProbe:
+          httpGet:
+            path: /
+            port: scrape
+          successThreshold: 2
+        stdin: false
+        tty: false
+        volumeMounts:
+        - mountPath: /host/proc
+          name: procfs
+          readOnly: true
+        - mountPath: /rootfs
+          name: root
+          readOnly: true
+        - mountPath: /host/sys
+          name: sysfs
+          readOnly: true
+      hostNetwork: true
+      hostPID: true
+      imagePullSecrets: []
+      initContainers: []
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      volumes:
+      - hostPath:
+          path: /proc
+          type: ""
+        name: procfs
+      - hostPath:
+          path: /
+          type: ""
+        name: root
+      - hostPath:
+          path: /sys
+          type: ""
+        name: sysfs
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+---
+apiVersion: v1
+data:
+  basic.yaml: |
+    groups:
+    - name: basic.rules
+      rules:
+      - alert: CrashLooping
+        annotations:
+          message: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container
+            }}) is restarting {{ $value }} times / 5 minutes.
+        expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 0
+        for: 1h
+        labels:
+          severity: critical
+      - alert: K8sApiUnavailable
+        annotations:
+          message: Kubernetes API has disappeared from Prometheus target discovery
+        expr: absent(up{job="kubernetes-apiservers"} == 1)
+        for: 15m
+        labels:
+          severity: critical
+  monitoring.yml: |
+    groups:
+    - name: monitoring.rules
+      rules:
+      - alert: AlertmanagerBadConfig
+        annotations:
+          message: Reloading Alertmanager's configuration has failed for {{ $labels.namespace
+            }}/{{ $labels.pod }}.
+        expr: alertmanager_config_last_reload_successful{kubernetes_namespace="kubeprod"}
+          == 0
+        for: 10m
+        labels:
+          severity: warning
+      - alert: PrometheusBadConfig
+        annotations:
+          message: Prometheus {{ $labels.namespace }}/{{ $labels.pod }} has failed to
+            reload its configuration.
+        expr: max_over_time(prometheus_config_last_reload_successful{kubernetes_namespace="kubeprod"}[5m])
+          == 0
+        for: 10m
+        labels:
+          severity: critical
+  prometheus.yml: |
+    alerting:
+      alertmanagers:
+      - kubernetes_sd_configs:
+        - role: endpoints
+        path_prefix: /alertmanager
+        relabel_configs:
+        - action: keep
+          regex: kubeprod;alertmanager;alertmanager
+          source_labels:
+          - __meta_kubernetes_namespace
+          - __meta_kubernetes_service_name
+          - __meta_kubernetes_endpoint_port_name
+    global:
+      evaluation_interval: 60s
+      scrape_interval: 60s
+    rule_files:
+    - basic.yaml
+    - monitoring.yml
+    scrape_configs:
+    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      job_name: kubernetes-apiservers
+      relabel_configs: []
+      scheme: https
+      static_configs:
+      - targets:
+        - kubernetes.default.svc:443
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      job_name: kubernetes-cadvisor
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - replacement: kubernetes.default.svc:443
+        target_label: __address__
+      - regex: (.+)
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+        source_labels:
+        - __meta_kubernetes_node_name
+        target_label: __metrics_path__
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    - job_name: kubernetes-ingresses
+      kubernetes_sd_configs:
+      - role: ingress
+      metrics_path: /probe
+      params:
+        module:
+        - http_2xx
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_ingress_annotation_prometheus_io_probe
+      - regex: (.+);(.+);(.+)
+        replacement: ${1}://${2}${3}
+        source_labels:
+        - __meta_kubernetes_ingress_scheme
+        - __address__
+        - __meta_kubernetes_ingress_path
+        target_label: __param_target
+      - replacement: blackbox-exporter:9115
+        target_label: __address__
+      - source_labels:
+        - __param_target
+        target_label: instance
+      - action: labelmap
+        regex: __meta_kubernetes_ingress_label_(.+)
+      - source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - source_labels:
+        - __meta_kubernetes_ingress_name
+        target_label: kubernetes_name
+    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      job_name: kubernetes-nodes
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - replacement: kubernetes.default.svc:443
+        target_label: __address__
+      - regex: (.+)
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+        source_labels:
+        - __meta_kubernetes_node_name
+        target_label: __metrics_path__
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    - job_name: kubernetes-pods
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+      - action: replace
+        regex: (.+)
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_path
+        target_label: __metrics_path__
+      - action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        source_labels:
+        - __address__
+        - __meta_kubernetes_pod_annotation_prometheus_io_port
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: kubernetes_pod_name
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      job_name: kubernetes-service-endpoints
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_scrape
+      - action: replace
+        regex: (https?)
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_scheme
+        target_label: __scheme__
+      - action: replace
+        regex: (.+)
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_path
+        target_label: __metrics_path__
+      - action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        source_labels:
+        - __address__
+        - __meta_kubernetes_service_annotation_prometheus_io_port
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_service_name
+        target_label: kubernetes_name
+      scheme: http
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    - job_name: kubernetes-services
+      kubernetes_sd_configs:
+      - role: service
+      metrics_path: /probe
+      params:
+        module:
+        - http_2xx
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_probe
+      - source_labels:
+        - __address__
+        target_label: __param_target
+      - replacement: blackbox-exporter:9115
+        target_label: __address__
+      - source_labels:
+        - __param_target
+        target_label: instance
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - source_labels:
+        - __meta_kubernetes_service_name
+        target_label: kubernetes_name
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: kubeprod
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: kubeprod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: prometheus
+  serviceName: prometheus
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9090"
+        prometheus.io/scrape: "true"
+      labels:
+        name: prometheus
+    spec:
+      containers:
+      - args:
+        - --config.file=/opt/bitnami/prometheus/conf/custom/prometheus.yml
+        - --storage.tsdb.retention.time=183d
+        - --web.console.libraries=/opt/bitnami/prometheus/conf/console_libraries
+        - --web.console.templates=/opt/bitnami/prometheus/conf/consoles
+        - --web.external-url=http://prometheus.xamaral.com/
+        - --web.enable-lifecycle
+        env: []
+        image: bitnami/prometheus:2.22.1-debian-10-r7
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /
+            port: web
+          initialDelaySeconds: 1200
+          successThreshold: 1
+        name: prometheus
+        ports:
+        - containerPort: 9090
+          name: web
+        readinessProbe:
+          httpGet:
+            path: /
+            port: web
+          initialDelaySeconds: 5
+          successThreshold: 2
+        resources:
+          requests:
+            cpu: 500m
+            memory: 500Mi
+        securityContext:
+          runAsUser: 1001
+        stdin: false
+        tty: false
+        volumeMounts:
+        - mountPath: /opt/bitnami/prometheus/conf/custom
+          name: config
+          readOnly: true
+        - mountPath: /opt/bitnami/prometheus/data
+          name: data
+      - args:
+        - --volume-dir=/config
+        - --webhook-method=POST
+        - --webhook-url=http://localhost:9090/-/reload
+        env: []
+        image: bitnami/configmap-reload:0.4.0-debian-10-r1
+        imagePullPolicy: IfNotPresent
+        name: configmap-reload
+        ports: []
+        stdin: false
+        tty: false
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          readOnly: true
+      imagePullSecrets: []
+      initContainers: []
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: prometheus
+      terminationGracePeriodSeconds: 300
+      volumes:
+      - configMap:
+          name: prometheus
+        name: config
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        name: data
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 7905Mi
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - nodes/proxy
+  - nodes/metrics
+  - services
+  - endpoints
+  - pods
+  - ingresses
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  - ingresses/status
+  verbs:
+  - get
+  - list
+  - watch
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: kubeprod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: kubeprod
+spec:
+  ports:
+  - name: web
+    port: 9090
+    targetPort: 9090
+  selector:
+    name: prometheus
+  type: ClusterIP
+---
+apiVersion: v1
+data:
+  config.yml: |
+    global:
+      resolve_timeout: 5m
+    inhibit_rules:
+    - equal:
+      - alertname
+      - cluster
+      - service
+      source_match:
+        severity: critical
+      target_match:
+        severity: warning
+    receivers:
+    - name: email
+    route:
+      group_by:
+      - alertname
+      - cluster
+      - service
+      group_interval: 5m
+      group_wait: 30s
+      receiver: email
+      repeat_interval: 7d
+      routes: []
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: alertmanager
+  name: alertmanager
+  namespace: kubeprod
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations: {}
+  labels:
+    name: alertmanager
+  name: alertmanager
+  namespace: kubeprod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: alertmanager
+  serviceName: alertmanager
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /alertmanager/metrics
+        prometheus.io/port: "9093"
+        prometheus.io/scrape: "true"
+      labels:
+        name: alertmanager
+    spec:
+      containers:
+      - args:
+        - --config.file=/opt/bitnami/alertmanager/conf/config.yml
+        - --storage.path=/opt/bitnami/alertmanager/data
+        - --web.external-url=http://prometheus.xamaral.com/alertmanager
+        env: []
+        image: bitnami/alertmanager:0.21.0-debian-10-r4
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /alertmanager/-/healthy
+            port: 9093
+          initialDelaySeconds: 60
+        name: alertmanager
+        ports:
+        - containerPort: 9093
+          name: alertmanager
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /alertmanager/-/healthy
+            port: 9093
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          timeoutSeconds: 3
+        stdin: false
+        tty: false
+        volumeMounts:
+        - mountPath: /opt/bitnami/alertmanager/conf
+          name: config
+          readOnly: true
+        - mountPath: /opt/bitnami/alertmanager/data
+          name: storage
+      - args:
+        - --volume-dir=/config
+        - --webhook-method=POST
+        - --webhook-url=http://localhost:9093/alertmanager/-/reload
+        env: []
+        image: bitnami/configmap-reload:0.4.0-debian-10-r1
+        imagePullPolicy: IfNotPresent
+        name: configmap-reload
+        ports: []
+        stdin: false
+        tty: false
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          readOnly: true
+      imagePullSecrets: []
+      initContainers: []
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          name: alertmanager
+        name: config
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        name: storage
+      name: storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: alertmanager
+  name: alertmanager
+  namespace: kubeprod
+spec:
+  ports:
+  - name: alertmanager
+    port: 9093
+    targetPort: 9093
+  selector:
+    name: alertmanager
+  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
@@ -12492,3 +12439,56 @@ spec:
       initContainers: []
       terminationGracePeriodSeconds: 30
       volumes: []
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImagePolicy
+metadata:
+  annotations: {}
+  labels:
+    name: livefpl
+  name: livefpl
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: livefpl
+  policy:
+    semver:
+      range: 0.0.x
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImageRepository
+metadata:
+  annotations: {}
+  labels:
+    name: livefpl
+  name: livefpl
+  namespace: flux-system
+spec:
+  image: ghcr.io/paulrudin/livefpl
+  interval: 1m0s
+  secretRef:
+    name: ghcrcred
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/acme-challenge-type: http01
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+  labels:
+    name: livefpl
+  name: livefpl
+spec:
+  rules:
+  - host: livefpl.xamaral.com
+    http:
+      paths:
+      - backend:
+          serviceName: livefpl
+          servicePort: 8000
+        path: /
+  tls:
+  - hosts:
+    - livefpl.xamaral.com
+    secretName: livefpl-tls-secret
