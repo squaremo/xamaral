@@ -3,7 +3,7 @@
   local name = 'livefpl',
   // NB - currently this secret is manually provisioned
   local regsecret = { name: 'ghcrcred' },
-  image_repository: k.ImageRepository(name) + {
+  image_repository: k.crds.ImageRepository(name) + {
     spec: {
       image: 'ghcr.io/paulrudin/%s' % name,
       interval: '1m0s',
@@ -11,7 +11,7 @@
     },
   },
 
-  image_policy: k.ImagePolicy(name) + {
+  image_policy: k.crds.ImagePolicy(name) + {
     spec+: {
       policy: {
         semver: '>=v0.0.1-1',
