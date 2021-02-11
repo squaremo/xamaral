@@ -14,7 +14,9 @@
   image_policy: k.crds.ImagePolicy(name) + {
     spec+: {
       policy: {
-        semver: '>=v0.0.1-1',
+        semver: {
+          range: '>=v0.0.1-1',
+        },
       },
     },
   },
