@@ -14,6 +14,7 @@ prod: gen/prod/all.yaml
 
 gen/prod/all.yaml: envs/prod/all.jsonnet $(JSFILES)
 	kubecfg -V "env=prod" -J $(mkfile_dir) show $< --context prod > $@
+	sed -i -f sed.txt $@
 
 
 fmttest: $(JS_FILES:%=%-fmttest)

@@ -1,15 +1,28 @@
 {
   local k = $.globals.k,
   local name = 'livefpl',
+  // NB - currently this secret is manually provisioned
+  local regsecret = { name: 'ghcrcred' },
+  image_repository: k.ImageRepository(name) + {
+    spec: {
+      image: 'ghcr.io/paulrudin/%s' % name,
+      interval: '1m0s',
+      secretRef: regsecret,
+    },
+  },
 
+  image_policy: k.ImagePolicy(name) + {
+    spec+: {
+      policy: {
+        semver: '>=v0.0.1-1',
+      },
+    },
+  },
   deploy: k.Deployment(name) + {
     spec+: {
       template+: {
         spec+: {
-          imagePullSecrets: [{
-            // NB - currently this secret is manually provisioned
-            name: 'ghcrcred',
-          }],
+          imagePullSecrets: [regsecret],
           containers_+: {
             default: k.Container(name) + {
               ports_+: {
@@ -21,7 +34,7 @@
         },
       },
     },
-  }, //deployment
+  },  //deployment
   svc: k.Service(name) + {
     target_pod: $.deploy.spec.template,
   },
@@ -37,5 +50,5 @@
         },
       }],
     },
-  }, //ingress
+  },  //ingress
 }

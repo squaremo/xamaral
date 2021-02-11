@@ -2,6 +2,19 @@
 
   local t = self,
   crds: {
+    ImageRepository(name): $._Object(
+      'image.toolkit.fluxcd.io/v1alpha1', 'ImageRepository', name
+    ),
+
+    ImagePolicy(name): $._Object(
+      'image.toolkit.fluxcd.io/v1alpha1', 'ImagePolicy', name
+    ) + {
+      spec+: {
+        imageRepositoryRef: {name: name},
+        policy: error 'policy required',
+      }
+    },
+
     Elasticsearch(name): $._Object(
       'elasticsearch.k8s.elastic.co/v1', 'Elasticsearch', name,
     ) +  {
