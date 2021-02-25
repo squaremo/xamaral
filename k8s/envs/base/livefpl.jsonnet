@@ -76,7 +76,7 @@
     name: ui_name,
     env: {
       API_URL: 'http://%s:%s' % [name, port],
-      PORT: port,
+      PORT: std.toString(port),
     },
   }).def,
 
