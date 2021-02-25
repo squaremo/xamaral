@@ -61,7 +61,7 @@
                 ports_+: {
                   http: { containerPort: port },
                 },
-                image: '$.globals.images.%s', 
+                image: '$.globals.images.%s' % s.name, 
               },
             },
           },
@@ -75,11 +75,11 @@
   ui_deploy: (self.deploy_template + {
     name: ui_name,
     env: {
-      API_URL: 'http://%s:%s' % [ui_name, port],
+      API_URL: 'http://%s:%s' % [name, port],
       PORT: port,
     },
   }).def,
-  
+
   ui_svc: k.Service(ui_name) + {
     target_pod: $.ui_deploy.spec.template,
   },
