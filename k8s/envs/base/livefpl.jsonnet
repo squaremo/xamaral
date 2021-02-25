@@ -61,7 +61,7 @@
                 ports_+: {
                   http: { containerPort: port },
                 },
-                image: '$.globals.images.%s' % s.name, 
+                image: $.globals.images[s.name],
               },
             },
           },
