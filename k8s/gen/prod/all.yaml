@@ -12359,7 +12359,7 @@ spec:
           value: http://livefpl:8000
         - name: PORT
           value: "8000"
-        image: ghcr.io/paulrudin/livefpl-ui:0.0.23 # {"$imagepolicy": "flux-system:livefpl-ui"}
+        image: ghcr.io/paulrudin/livefpl-ui:0.0.24 # {"$imagepolicy": "flux-system:livefpl-ui"}
         imagePullPolicy: IfNotPresent
         name: livefpl-ui
         ports:
@@ -12429,7 +12429,7 @@ spec:
       containers:
       - args: []
         env: []
-        image: ghcr.io/paulrudin/livefpl:0.0.21 # {"$imagepolicy": "flux-system:livefpl"}
+        image: ghcr.io/paulrudin/livefpl:0.0.22 # {"$imagepolicy": "flux-system:livefpl"}
         imagePullPolicy: IfNotPresent
         name: livefpl
         ports:
