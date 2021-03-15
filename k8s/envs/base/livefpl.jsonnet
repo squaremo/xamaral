@@ -2,7 +2,7 @@
   local k = $.globals.k,
   local name = 'livefpl',
   local ui_name = 'livefpl-ui',
-
+  local host = 'livefpl.xamaral.com',
   // same for api and ui
   local port = 8000,
   local fs_ns_mixin = {
@@ -77,6 +77,7 @@
     env: {
       API_URL: 'http://%s:%s' % [name, port],
       PORT: std.toString(port),
+      HOST: 'https://%s' % host,
     },
   }).def,
 
@@ -92,7 +93,7 @@
   ingress: k.Ingress(name) + k.mixins.TlsIngress + {
     spec+: {
       rules+: [{
-        host: 'livefpl.xamaral.com',
+        host: host,
         http: {
           paths: [{
             path: '/',
