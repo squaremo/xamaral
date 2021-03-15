@@ -1,8 +1,19 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: external-dns
+  name: external-dns
+  namespace: kubeprod
+---
 apiVersion: v1
 data:
   azure.json: ewogICAgImFhZENsaWVudElkIjogIjhhZjkyZDI0LTcwN2ItNDRlMS04ZTZiLWI0NDkxOTEzYjM5ZSIsCiAgICAiYWFkQ2xpZW50U2VjcmV0IjogInpYVHJaRWQ0clVYb2l6UzQiLAogICAgInJlc291cmNlR3JvdXAiOiAieGFtYXJhbCIsCiAgICAic3Vic2NyaXB0aW9uSWQiOiAiYmJlOTg4OTktNTIyMC00ZmYxLTlkZjQtZDE2NjY0Y2M3NzVjIiwKICAgICJ0ZW5hbnRJZCI6ICJjOTdhNDI5OS0zZWU0LTRlYWItOGFiMy00YmNhN2M2ZmM0NGQiCn0=
 kind: Secret
 metadata:
+  annotations: {}
   labels:
     name: external-dns-azure-conf
   name: external-dns-azure-conf-710c9d3
@@ -12,6 +23,7 @@ type: Opaque
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
+  annotations: {}
   labels:
     name: external-dns
   name: external-dns
@@ -62,6 +74,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
+  annotations: {}
   labels:
     name: external-dns-viewer
   name: external-dns-viewer
@@ -140,6 +153,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations: {}
   labels:
     name: external-dns
   name: external-dns
@@ -208,12 +222,21 @@ spec:
           secretName: external-dns-azure-conf-710c9d3
 ---
 apiVersion: v1
-kind: ServiceAccount
+kind: Service
 metadata:
+  annotations: {}
   labels:
-    name: external-dns
-  name: external-dns
+    name: grafana
+  name: grafana
   namespace: kubeprod
+spec:
+  ports:
+  - name: dashboard
+    port: 3000
+    targetPort: 3000
+  selector:
+    name: grafana
+  type: ClusterIP
 ---
 apiVersion: v1
 data:
@@ -229,6 +252,7 @@ data:
       type: file
 kind: ConfigMap
 metadata:
+  annotations: {}
   labels:
     name: grafana-dashboards-configuration
   name: grafana-dashboards-configuration-b7cab55
@@ -246,6 +270,7 @@ data:
       url: http://prometheus.kubeprod.svc:9090/
 kind: ConfigMap
 metadata:
+  annotations: {}
   labels:
     name: grafana-datasource-configuration
   name: grafana-datasource-configuration-30ac8c3
@@ -254,6 +279,7 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  annotations: {}
   labels:
     name: grafana
   name: grafana
@@ -4693,37 +4719,110 @@ data:
     }
 kind: ConfigMap
 metadata:
+  annotations: {}
   labels:
     name: grafana-kubernetes-dashboards
   name: grafana-kubernetes-dashboards-5bbac4b
   namespace: kubeprod
 ---
 apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: grafana
-  name: grafana
-  namespace: kubeprod
-spec:
-  ports:
-  - name: dashboard
-    port: 3000
-    targetPort: 3000
-  selector:
-    name: grafana
-  type: ClusterIP
----
-apiVersion: v1
 kind: Namespace
 metadata:
+  annotations: {}
   labels:
     name: kubeprod
   name: kubeprod
 ---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+  namespace: kubeprod
+spec:
+  maxReplicas: 10
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-ingress-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: nginx-ingress-controller
+  name: nginx-ingress-controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
+  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -4802,17 +4901,34 @@ rules:
   - get
   - update
 ---
-apiVersion: v1
-kind: ServiceAccount
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
 metadata:
+  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
+  namespace: kubeprod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      name: nginx-ingress-controller
+---
+apiVersion: v1
+data: {}
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: tcp-services
+  name: tcp-services-67c1890
   namespace: kubeprod
 ---
 apiVersion: v1
 kind: Service
 metadata:
+  annotations: {}
   labels:
     name: nginx-ingress
   name: nginx-ingress
@@ -4834,38 +4950,38 @@ apiVersion: v1
 data: {}
 kind: ConfigMap
 metadata:
-  labels:
-    name: tcp-services
-  name: tcp-services-67c1890
-  namespace: kubeprod
----
-apiVersion: v1
-data: {}
-kind: ConfigMap
-metadata:
+  annotations: {}
   labels:
     name: udp-services
   name: udp-services-67c1890
   namespace: kubeprod
 ---
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
+apiVersion: v1
+data:
+  disable-ipv6: "false"
+  enable-real-ip: "true"
+  enable-vts-status: "true"
+  hsts: "true"
+  http2-max-field-size: 16k
+  http2-max-header-size: 64k
+  large-client-header-buffers: 8 32k
+  no-auth-locations: /.well-known/acme-challenge,/oauth2
+  proxy-add-original-uri-header: "true"
+  proxy-buffer-size: 32k
+  proxy-connect-timeout: "15"
+  use-forwarded-headers: "true"
+kind: ConfigMap
 metadata:
+  annotations: {}
   labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
+    name: nginx-ingress
+  name: nginx-ingress-203e694
   namespace: kubeprod
-spec:
-  maxReplicas: 10
-  minReplicas: 2
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: nginx-ingress-controller
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -4977,77 +5093,9 @@ spec:
       volumes: []
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: nginx-ingress-controller
-  name: nginx-ingress-controller
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - endpoints
-  - nodes
-  - pods
-  - secrets
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - get
-  - list
-  - update
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses/status
-  verbs:
-  - update
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses/status
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
+  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -5063,6 +5111,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
+  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -5076,119 +5125,19 @@ subjects:
   name: nginx-ingress-controller
   namespace: kubeprod
 ---
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
+apiVersion: v1
+kind: ServiceAccount
 metadata:
+  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
   namespace: kubeprod
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      name: nginx-ingress-controller
----
-apiVersion: v1
-data:
-  disable-ipv6: "false"
-  enable-real-ip: "true"
-  enable-vts-status: "true"
-  hsts: "true"
-  http2-max-field-size: 16k
-  http2-max-header-size: 64k
-  large-client-header-buffers: 8 32k
-  no-auth-locations: /.well-known/acme-challenge,/oauth2
-  proxy-add-original-uri-header: "true"
-  proxy-buffer-size: 32k
-  proxy-connect-timeout: "15"
-  use-forwarded-headers: "true"
-kind: ConfigMap
-metadata:
-  labels:
-    name: nginx-ingress
-  name: nginx-ingress-203e694
-  namespace: kubeprod
----
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      location "~^/(?<target_host>[^/]+\.xamaral\.com)(?<remaining_uri>.*)$" {
-        rewrite ^ $scheme://$target_host$remaining_uri;
-      }
-  labels:
-    name: oauth2-ingress
-  name: oauth2-ingress
-  namespace: kubeprod
-spec:
-  rules:
-  - host: auth.xamaral.com
-    http:
-      paths:
-      - backend:
-          serviceName: oauth2-proxy
-          servicePort: 4180
-        path: /oauth2/
-      - backend:
-          serviceName: oauth2-proxy
-          servicePort: 4180
-        path: /
-  tls:
-  - hosts:
-    - auth.xamaral.com
-    secretName: oauth2-ingress-tls
----
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
-metadata:
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy
-  namespace: kubeprod
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      name: oauth2-proxy
----
-apiVersion: v1
-data:
-  authz_domain: Kg==
-  azure_tenant: Yzk3YTQyOTktM2VlNC00ZWFiLThhYjMtNGJjYTdjNmZjNDRk
-  client_id: NDdjZTJiYmYtMTE3Ni00ODBiLWFlMDAtNjI0MWY1NzFlZTc0
-  client_secret: V1dMSytNNzdwcDFHbE1PQVZBTzNpNG83
-  cookie_secret: bG9xYzlXRFJYQitKeVFTT1RrNHl0QWZsV2Y1cnhPSlM=
-kind: Secret
-metadata:
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy-7de4061
-  namespace: kubeprod
-type: Opaque
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: oauth2-proxy
-  name: oauth2-proxy
-  namespace: kubeprod
-spec:
-  ports:
-  - name: http
-    port: 4180
-    targetPort: 4180
-  selector:
-    name: oauth2-proxy
-  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations: {}
   labels:
     name: oauth2-proxy
   name: oauth2-proxy
@@ -5294,6 +5243,7 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
+  annotations: {}
   labels:
     name: oauth2-proxy
   name: oauth2-proxy
@@ -5306,20 +5256,83 @@ spec:
     kind: Deployment
     name: oauth2-proxy
 ---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location "~^/(?<target_host>[^/]+\.xamaral\.com)(?<remaining_uri>.*)$" {
+        rewrite ^ $scheme://$target_host$remaining_uri;
+      }
+  labels:
+    name: oauth2-ingress
+  name: oauth2-ingress
+  namespace: kubeprod
+spec:
+  rules:
+  - host: auth.xamaral.com
+    http:
+      paths:
+      - backend:
+          serviceName: oauth2-proxy
+          servicePort: 4180
+        path: /oauth2/
+      - backend:
+          serviceName: oauth2-proxy
+          servicePort: 4180
+        path: /
+  tls:
+  - hosts:
+    - auth.xamaral.com
+    secretName: oauth2-ingress-tls
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  annotations: {}
+  labels:
+    name: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubeprod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      name: oauth2-proxy
+---
+apiVersion: v1
+data:
+  authz_domain: Kg==
+  azure_tenant: Yzk3YTQyOTktM2VlNC00ZWFiLThhYjMtNGJjYTdjNmZjNDRk
+  client_id: NDdjZTJiYmYtMTE3Ni00ODBiLWFlMDAtNjI0MWY1NzFlZTc0
+  client_secret: V1dMSytNNzdwcDFHbE1PQVZBTzNpNG83
+  cookie_secret: bG9xYzlXRFJYQitKeVFTT1RrNHl0QWZsV2Y1cnhPSlM=
+kind: Secret
+metadata:
+  annotations: {}
+  labels:
+    name: oauth2-proxy
+  name: oauth2-proxy-7de4061
+  namespace: kubeprod
+type: Opaque
+---
 apiVersion: v1
 kind: Service
 metadata:
+  annotations: {}
   labels:
-    name: alertmanager
-  name: alertmanager
+    name: oauth2-proxy
+  name: oauth2-proxy
   namespace: kubeprod
 spec:
   ports:
-  - name: alertmanager
-    port: 9093
-    targetPort: 9093
+  - name: http
+    port: 4180
+    targetPort: 4180
   selector:
-    name: alertmanager
+    name: oauth2-proxy
   type: ClusterIP
 ---
 apiVersion: v1
@@ -5350,6 +5363,7 @@ data:
       routes: []
 kind: ConfigMap
 metadata:
+  annotations: {}
   labels:
     name: alertmanager
   name: alertmanager
@@ -5358,6 +5372,7 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  annotations: {}
   labels:
     name: alertmanager
   name: alertmanager
@@ -5452,6 +5467,23 @@ spec:
         requests:
           storage: 5Gi
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: alertmanager
+  name: alertmanager
+  namespace: kubeprod
+spec:
+  ports:
+  - name: alertmanager
+    port: 9093
+    targetPort: 9093
+  selector:
+    name: alertmanager
+  type: ClusterIP
+---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -5484,8 +5516,35 @@ spec:
     secretName: prometheus-tls
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics
+  name: kube-state-metrics
+  namespace: kubeprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kube-state-metrics-resizer
+subjects:
+- kind: ServiceAccount
+  name: kube-state-metrics
+  namespace: kubeprod
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: kube-state-metrics
+  name: kube-state-metrics
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
+  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -5599,6 +5658,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
+  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -5614,6 +5674,7 @@ subjects:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -5701,6 +5762,7 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
+  annotations: {}
   labels:
     name: kube-state-metrics-resizer
   name: kube-state-metrics-resizer
@@ -5722,33 +5784,10 @@ rules:
   - get
   - update
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  labels:
-    name: kube-state-metrics
-  name: kube-state-metrics
-  namespace: kubeprod
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: kube-state-metrics-resizer
-subjects:
-- kind: ServiceAccount
-  name: kube-state-metrics
-  namespace: kubeprod
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    name: kube-state-metrics
-  name: kube-state-metrics
-  namespace: kubeprod
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
+  annotations: {}
   labels:
     name: node-exporter
   name: node-exporter
@@ -5825,30 +5864,6 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
     type: RollingUpdate
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    name: prometheus
-  name: prometheus
-  namespace: kubeprod
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: prometheus
-  name: prometheus
-  namespace: kubeprod
-spec:
-  ports:
-  - name: web
-    port: 9090
-    targetPort: 9090
-  selector:
-    name: prometheus
-  type: ClusterIP
 ---
 apiVersion: v1
 data:
@@ -6091,6 +6106,7 @@ data:
         target_label: kubernetes_name
 kind: ConfigMap
 metadata:
+  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -6099,6 +6115,7 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -6203,6 +6220,7 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
+  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -6218,6 +6236,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
+  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -6252,10 +6271,37 @@ rules:
   - get
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: kubeprod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: kubeprod
+spec:
+  ports:
+  - name: web
+    port: 9090
+    targetPort: 9090
+  selector:
+    name: prometheus
+  type: ClusterIP
+---
+apiVersion: v1
 data:
   release: dev-untagged
 kind: ConfigMap
 metadata:
+  annotations: {}
   labels:
     name: release
   name: release
@@ -6264,6 +6310,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
+  annotations: {}
   labels:
     name: release-reader
   name: release-reader
@@ -6283,6 +6330,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
+  annotations: {}
   labels:
     name: release-read-public
   name: release-read-public
@@ -6297,132 +6345,28 @@ subjects:
   name: system:authenticated
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+kind: Role
 metadata:
+  annotations: {}
   labels:
-    name: cert-manager-clusterissuers
-  name: cert-manager-clusterissuers
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-clusterissuers
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
+    name: cert-manager-leaderelection
+  name: cert-manager:leaderelection
   namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    name: cert-manager-ingress-shim
-  name: cert-manager-ingress-shim
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-ingress-shim
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: cert-manager-issuers
-  name: cert-manager-issuers
 rules:
 - apiGroups:
-  - cert-manager.io
-  resources:
-  - issuers
-  - issuers/status
-  verbs:
-  - update
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - issuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - ""
   resources:
-  - secrets
+  - configmaps
   verbs:
   - get
-  - list
-  - watch
   - create
   - update
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
   - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    name: cert-manager-issuers
-  name: cert-manager-issuers
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-issuers
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    name: cert-manager
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    name: cert-manager-certificates
-  name: cert-manager-certificates
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-certificates
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    name: cert-manager-challenges
-  name: cert-manager-challenges
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-challenges
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
+  annotations: {}
   labels:
     name: letsencrypt-prod
   name: letsencrypt-prod
@@ -6440,6 +6384,7 @@ spec:
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
+  annotations: {}
   labels:
     name: letsencrypt-staging
   name: letsencrypt-staging
@@ -6455,170 +6400,9 @@ spec:
           class: nginx
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: cert-manager-view
-  name: cert-manager-view
-rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  - issuers
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: cert-manager-certificates
-  name: cert-manager-certificates
-rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificates/status
-  - certificaterequests
-  - certificaterequests/status
-  verbs:
-  - update
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  - clusterissuers
-  - issuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates/finalizers
-  - certificaterequests/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - orders
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: cert-manager-edit
-  name: cert-manager-edit
-rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  - issuers
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: cert-manager-orders
-  name: cert-manager-orders
-rules:
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - orders
-  - orders/status
-  verbs:
-  - update
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - orders
-  - challenges
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - clusterissuers
-  - issuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - challenges
-  verbs:
-  - create
-  - delete
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - orders/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
+  annotations: {}
   labels:
     name: cert-manager-orders
   name: cert-manager-orders
@@ -6626,233 +6410,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cert-manager-orders
-subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: kubeprod
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: cert-manager-challenges
-  name: cert-manager-challenges
-rules:
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - challenges
-  - challenges/status
-  verbs:
-  - update
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - challenges
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - issuers
-  - clusterissuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-  - update
-- apiGroups:
-  - acme.cert-manager.io
-  resources:
-  - challenges/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    name: cert-manager-ingress-shim
-  name: cert-manager-ingress-shim
-rules:
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  verbs:
-  - create
-  - update
-  - delete
-- apiGroups:
-  - cert-manager.io
-  resources:
-  - certificates
-  - certificaterequests
-  - issuers
-  - clusterissuers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - ingresses/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    name: cert-manager
-  name: cert-manager
-  namespace: kubeprod
-spec:
-  minReadySeconds: 30
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      name: cert-manager
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: "9402"
-        prometheus.io/scrape: "true"
-      labels:
-        name: cert-manager
-    spec:
-      containers:
-      - args:
-        - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v0.15.2
-        - --cluster-resource-namespace=$(POD_NAMESPACE)
-        - --default-issuer-kind=ClusterIssuer
-        - --default-issuer-name=letsencrypt-prod
-        - --leader-election-namespace=$(POD_NAMESPACE)
-        - --v=2
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        image: bitnami/cert-manager:0.16.1-debian-10-r3
-        imagePullPolicy: IfNotPresent
-        name: cert-manager
-        ports:
-        - containerPort: 9402
-          name: prometheus
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-        stdin: false
-        tty: false
-        volumeMounts: []
-      imagePullSecrets: []
-      initContainers: []
-      serviceAccountName: cert-manager
-      terminationGracePeriodSeconds: 30
-      volumes: []
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  labels:
-    name: cert-manager-leaderelection
-  name: cert-manager:leaderelection
-  namespace: kubeprod
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - get
-  - create
-  - update
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  labels:
-    name: cert-manager-leaderelection
-  name: cert-manager:leaderelection
-  namespace: kubeprod
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: cert-manager:leaderelection
 subjects:
 - kind: ServiceAccount
   name: cert-manager
@@ -12276,9 +11833,454 @@ spec:
     served: true
     storage: true
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager
+  name: cert-manager
+  namespace: kubeprod
+spec:
+  minReadySeconds: 30
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: cert-manager
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9402"
+        prometheus.io/scrape: "true"
+      labels:
+        name: cert-manager
+    spec:
+      containers:
+      - args:
+        - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v0.15.2
+        - --cluster-resource-namespace=$(POD_NAMESPACE)
+        - --default-issuer-kind=ClusterIssuer
+        - --default-issuer-name=letsencrypt-prod
+        - --leader-election-namespace=$(POD_NAMESPACE)
+        - --v=2
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: bitnami/cert-manager:0.16.1-debian-10-r3
+        imagePullPolicy: IfNotPresent
+        name: cert-manager
+        ports:
+        - containerPort: 9402
+          name: prometheus
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        stdin: false
+        tty: false
+        volumeMounts: []
+      imagePullSecrets: []
+      initContainers: []
+      serviceAccountName: cert-manager
+      terminationGracePeriodSeconds: 30
+      volumes: []
+---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-edit
+  name: cert-manager-edit
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  - issuers
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-ingress-shim
+  name: cert-manager-ingress-shim
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-ingress-shim
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-issuers
+  name: cert-manager-issuers
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - issuers
+  - issuers/status
+  verbs:
+  - update
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - issuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-issuers
+  name: cert-manager-issuers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-issuers
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-orders
+  name: cert-manager-orders
+rules:
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - orders
+  - orders/status
+  verbs:
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - orders
+  - challenges
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - clusterissuers
+  - issuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges
+  verbs:
+  - create
+  - delete
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - orders/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-view
+  name: cert-manager-view
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  - issuers
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-certificates
+  name: cert-manager-certificates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-certificates
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-challenges
+  name: cert-manager-challenges
+rules:
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges
+  - challenges/status
+  verbs:
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - issuers
+  - clusterissuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-leaderelection
+  name: cert-manager:leaderelection
+  namespace: kubeprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-manager:leaderelection
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-certificates
+  name: cert-manager-certificates
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificates/status
+  - certificaterequests
+  - certificaterequests/status
+  verbs:
+  - update
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  - clusterissuers
+  - issuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates/finalizers
+  - certificaterequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - orders
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-challenges
+  name: cert-manager-challenges
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-challenges
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
   labels:
     name: cert-manager-clusterissuers
   name: cert-manager-clusterissuers
@@ -12317,46 +12319,105 @@ rules:
   - create
   - patch
 ---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-clusterissuers
+  name: cert-manager-clusterissuers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-clusterissuers
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: kubeprod
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: cert-manager-ingress-shim
+  name: cert-manager-ingress-shim
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  verbs:
+  - create
+  - update
+  - delete
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - certificaterequests
+  - issuers
+  - clusterissuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImagePolicy
+metadata:
+  annotations: {}
+  labels:
+    name: livefpl-ui
+  name: livefpl-ui
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: livefpl-ui
+  policy:
+    semver:
+      range: 0.0.x
+---
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImageRepository
 metadata:
+  annotations: {}
   labels:
-    name: livefpl
-  name: livefpl
+    name: livefpl-ui
+  name: livefpl-ui
   namespace: flux-system
 spec:
-  image: ghcr.io/paulrudin/livefpl
+  image: ghcr.io/paulrudin/livefpl-ui
   interval: 1m0s
   secretRef:
     name: ghcrcred
 ---
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  annotations:
-    cert-manager.io/acme-challenge-type: http01
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    kubernetes.io/ingress.class: nginx
-  labels:
-    name: livefpl
-  name: livefpl
-spec:
-  rules:
-  - host: livefpl.xamaral.com
-    http:
-      paths:
-      - backend:
-          serviceName: livefpl-ui
-          servicePort: 8000
-        path: /
-  tls:
-  - hosts:
-    - livefpl.xamaral.com
-    secretName: livefpl-tls-secret
----
 apiVersion: v1
 kind: Service
 metadata:
+  annotations: {}
   labels:
     name: livefpl-ui
   name: livefpl-ui
@@ -12368,22 +12429,10 @@ spec:
     name: livefpl-ui
   type: ClusterIP
 ---
-apiVersion: image.toolkit.fluxcd.io/v1alpha1
-kind: ImageRepository
-metadata:
-  labels:
-    name: livefpl-ui
-  name: livefpl-ui
-  namespace: flux-system
-spec:
-  image: ghcr.io/paulrudin/livefpl-ui
-  interval: 1m0s
-  secretRef:
-    name: ghcrcred
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations: {}
   labels:
     name: livefpl
   name: livefpl
@@ -12408,7 +12457,7 @@ spec:
       containers:
       - args: []
         env: []
-        image: ghcr.io/paulrudin/livefpl:0.0.22 # {"$imagepolicy": "flux-system:livefpl"}
+        image: ghcr.io/paulrudin/livefpl:0.0.10 # {"$imagepolicy": "flux-system:livefpl"}
         imagePullPolicy: IfNotPresent
         name: livefpl
         ports:
@@ -12424,22 +12473,23 @@ spec:
       volumes: []
 ---
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
-kind: ImagePolicy
+kind: ImageRepository
 metadata:
+  annotations: {}
   labels:
     name: livefpl
   name: livefpl
   namespace: flux-system
 spec:
-  imageRepositoryRef:
-    name: livefpl
-  policy:
-    semver:
-      range: 0.0.x
+  image: ghcr.io/paulrudin/livefpl
+  interval: 1m0s
+  secretRef:
+    name: ghcrcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
+  annotations: {}
   labels:
     name: livefpl
   name: livefpl
@@ -12454,6 +12504,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations: {}
   labels:
     name: livefpl-ui
   name: livefpl-ui
@@ -12480,9 +12531,11 @@ spec:
         env:
         - name: API_URL
           value: http://livefpl:8000
+        - name: HOST
+          value: https://livefpl.xamaral.com
         - name: PORT
           value: "8000"
-        image: ghcr.io/paulrudin/livefpl-ui:0.0.27 # {"$imagepolicy": "flux-system:livefpl-ui"}
+        image: ghcr.io/paulrudin/livefpl-ui:0.0.20 # {"$imagepolicy": "flux-system:livefpl-ui"}
         imagePullPolicy: IfNotPresent
         name: livefpl-ui
         ports:
@@ -12500,13 +12553,38 @@ spec:
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImagePolicy
 metadata:
+  annotations: {}
   labels:
-    name: livefpl-ui
-  name: livefpl-ui
+    name: livefpl
+  name: livefpl
   namespace: flux-system
 spec:
   imageRepositoryRef:
-    name: livefpl-ui
+    name: livefpl
   policy:
     semver:
       range: 0.0.x
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/acme-challenge-type: http01
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+  labels:
+    name: livefpl
+  name: livefpl
+spec:
+  rules:
+  - host: livefpl.xamaral.com
+    http:
+      paths:
+      - backend:
+          serviceName: livefpl-ui
+          servicePort: 8000
+        path: /
+  tls:
+  - hosts:
+    - livefpl.xamaral.com
+    secretName: livefpl-tls-secret
