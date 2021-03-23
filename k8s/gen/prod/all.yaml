@@ -12460,7 +12460,7 @@ spec:
           value: https://livefpl.xamaral.com
         - name: PORT
           value: "8000"
-        image: ghcr.io/paulrudin/livefpl-ui:0.0.32 # {"$imagepolicy": "flux-system:livefpl-ui"}
+        image: ghcr.io/paulrudin/livefpl-ui:0.0.33 # {"$imagepolicy": "flux-system:livefpl-ui"}
         imagePullPolicy: IfNotPresent
         name: livefpl-ui
         ports:
