@@ -1,10 +1,8 @@
----
 apiVersion: v1
 data:
   azure.json: ewogICAgImFhZENsaWVudElkIjogIjhhZjkyZDI0LTcwN2ItNDRlMS04ZTZiLWI0NDkxOTEzYjM5ZSIsCiAgICAiYWFkQ2xpZW50U2VjcmV0IjogInpYVHJaRWQ0clVYb2l6UzQiLAogICAgInJlc291cmNlR3JvdXAiOiAieGFtYXJhbCIsCiAgICAic3Vic2NyaXB0aW9uSWQiOiAiYmJlOTg4OTktNTIyMC00ZmYxLTlkZjQtZDE2NjY0Y2M3NzVjIiwKICAgICJ0ZW5hbnRJZCI6ICJjOTdhNDI5OS0zZWU0LTRlYWItOGFiMy00YmNhN2M2ZmM0NGQiCn0=
 kind: Secret
 metadata:
-  annotations: {}
   labels:
     name: external-dns-azure-conf
   name: external-dns-azure-conf-710c9d3
@@ -14,7 +12,6 @@ type: Opaque
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: external-dns
   name: external-dns
@@ -65,7 +62,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: external-dns-viewer
   name: external-dns-viewer
@@ -144,7 +140,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: external-dns
   name: external-dns
@@ -215,7 +210,6 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: {}
   labels:
     name: external-dns
   name: external-dns
@@ -233,7 +227,6 @@ data:
       url: http://prometheus.kubeprod.svc:9090/
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: grafana-datasource-configuration
   name: grafana-datasource-configuration-30ac8c3
@@ -242,7 +235,6 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  annotations: {}
   labels:
     name: grafana
   name: grafana
@@ -4682,7 +4674,6 @@ data:
     }
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: grafana-kubernetes-dashboards
   name: grafana-kubernetes-dashboards-5bbac4b
@@ -4691,7 +4682,6 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: grafana
   name: grafana
@@ -4719,7 +4709,6 @@ data:
       type: file
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: grafana-dashboards-configuration
   name: grafana-dashboards-configuration-b7cab55
@@ -4728,7 +4717,6 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  annotations: {}
   labels:
     name: kubeprod
   name: kubeprod
@@ -4736,7 +4724,6 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -4850,7 +4837,6 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -4867,7 +4853,6 @@ subjects:
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -4881,7 +4866,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress
   name: nginx-ingress
@@ -4903,7 +4887,6 @@ apiVersion: v1
 data: {}
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: tcp-services
   name: tcp-services-67c1890
@@ -4913,7 +4896,6 @@ apiVersion: v1
 data: {}
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: udp-services
   name: udp-services-67c1890
@@ -4935,7 +4917,6 @@ data:
   use-forwarded-headers: "true"
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress
   name: nginx-ingress-203e694
@@ -4944,7 +4925,6 @@ metadata:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -4960,7 +4940,6 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -5030,7 +5009,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -5046,7 +5024,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -5128,7 +5105,6 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: {}
   labels:
     name: nginx-ingress-controller
   name: nginx-ingress-controller
@@ -5137,7 +5113,6 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: oauth2-proxy
   name: oauth2-proxy
@@ -5154,7 +5129,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: oauth2-proxy
   name: oauth2-proxy
@@ -5260,7 +5234,6 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  annotations: {}
   labels:
     name: oauth2-proxy
   name: oauth2-proxy
@@ -5308,7 +5281,6 @@ spec:
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  annotations: {}
   labels:
     name: oauth2-proxy
   name: oauth2-proxy
@@ -5328,7 +5300,6 @@ data:
   cookie_secret: bG9xYzlXRFJYQitKeVFTT1RrNHl0QWZsV2Y1cnhPSlM=
 kind: Secret
 metadata:
-  annotations: {}
   labels:
     name: oauth2-proxy
   name: oauth2-proxy-7de4061
@@ -5338,7 +5309,6 @@ type: Opaque
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  annotations: {}
   labels:
     name: node-exporter
   name: node-exporter
@@ -5419,7 +5389,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -5674,7 +5643,6 @@ data:
         target_label: kubernetes_name
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -5683,7 +5651,6 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -5788,7 +5755,6 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -5804,7 +5770,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -5841,7 +5806,6 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: {}
   labels:
     name: prometheus
   name: prometheus
@@ -5850,7 +5814,6 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  annotations: {}
   labels:
     name: alertmanager
   name: alertmanager
@@ -5948,7 +5911,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: alertmanager
   name: alertmanager
@@ -5990,7 +5952,6 @@ data:
       routes: []
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: alertmanager
   name: alertmanager
@@ -6030,7 +5991,6 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -6046,7 +6006,6 @@ subjects:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -6134,7 +6093,6 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: kube-state-metrics-resizer
   name: kube-state-metrics-resizer
@@ -6159,7 +6117,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -6176,7 +6133,6 @@ subjects:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -6185,7 +6141,6 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: kube-state-metrics
   name: kube-state-metrics
@@ -6301,7 +6256,6 @@ data:
   release: dev-untagged
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: release
   name: release
@@ -6310,7 +6264,6 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: release-reader
   name: release-reader
@@ -6330,7 +6283,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: release-read-public
   name: release-read-public
@@ -11765,7 +11717,6 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-challenges
   name: cert-manager-challenges
@@ -11849,7 +11800,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-edit
   name: cert-manager-edit
@@ -11870,7 +11820,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-ingress-shim
   name: cert-manager-ingress-shim
@@ -11886,7 +11835,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-orders
   name: cert-manager-orders
@@ -11948,7 +11896,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-certificates
   name: cert-manager-certificates
@@ -12012,7 +11959,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-certificates
   name: cert-manager-certificates
@@ -12028,7 +11974,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-clusterissuers
   name: cert-manager-clusterissuers
@@ -12070,7 +12015,6 @@ rules:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: cert-manager
   name: cert-manager
@@ -12132,7 +12076,6 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-view
   name: cert-manager-view
@@ -12151,7 +12094,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-challenges
   name: cert-manager-challenges
@@ -12167,7 +12109,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-ingress-shim
   name: cert-manager-ingress-shim
@@ -12217,7 +12158,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-issuers
   name: cert-manager-issuers
@@ -12233,7 +12173,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-leaderelection
   name: cert-manager:leaderelection
@@ -12252,7 +12191,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-leaderelection
   name: cert-manager:leaderelection
@@ -12269,7 +12207,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-orders
   name: cert-manager-orders
@@ -12285,7 +12222,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-clusterissuers
   name: cert-manager-clusterissuers
@@ -12301,7 +12237,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     name: cert-manager-issuers
   name: cert-manager-issuers
@@ -12343,7 +12278,6 @@ rules:
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
-  annotations: {}
   labels:
     name: letsencrypt-prod
   name: letsencrypt-prod
@@ -12361,7 +12295,6 @@ spec:
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
-  annotations: {}
   labels:
     name: letsencrypt-staging
   name: letsencrypt-staging
@@ -12379,7 +12312,6 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: {}
   labels:
     name: cert-manager
   name: cert-manager
@@ -12388,7 +12320,6 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: livefpl-ui
   name: livefpl-ui
@@ -12403,7 +12334,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: livefpl
   name: livefpl
@@ -12428,7 +12358,7 @@ spec:
       containers:
       - args: []
         env: []
-        image: ghcr.io/paulrudin/livefpl:0.0.10 # {"$imagepolicy": "flux-system:livefpl"}
+        image: ghcr.io/paulrudin/livefpl:0.0.22 # {"$imagepolicy": "flux-system:livefpl"}
         imagePullPolicy: IfNotPresent
         name: livefpl
         ports:
@@ -12470,7 +12400,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: livefpl
   name: livefpl
@@ -12485,7 +12414,6 @@ spec:
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImagePolicy
 metadata:
-  annotations: {}
   labels:
     name: livefpl-ui
   name: livefpl-ui
@@ -12500,7 +12428,6 @@ spec:
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImageRepository
 metadata:
-  annotations: {}
   labels:
     name: livefpl-ui
   name: livefpl-ui
@@ -12514,7 +12441,6 @@ spec:
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImagePolicy
 metadata:
-  annotations: {}
   labels:
     name: livefpl
   name: livefpl
@@ -12529,7 +12455,6 @@ spec:
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImageRepository
 metadata:
-  annotations: {}
   labels:
     name: livefpl
   name: livefpl
@@ -12543,7 +12468,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: livefpl-ui
   name: livefpl-ui
@@ -12574,7 +12498,7 @@ spec:
           value: https://livefpl.xamaral.com
         - name: PORT
           value: "8000"
-        image: ghcr.io/paulrudin/livefpl-ui:0.0.20 # {"$imagepolicy": "flux-system:livefpl-ui"}
+        image: ghcr.io/paulrudin/livefpl-ui:0.0.35 # {"$imagepolicy": "flux-system:livefpl-ui"}
         imagePullPolicy: IfNotPresent
         name: livefpl-ui
         ports:
