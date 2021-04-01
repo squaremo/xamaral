@@ -19,7 +19,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations: {}
       labels:
         name: livefpl
     spec:
